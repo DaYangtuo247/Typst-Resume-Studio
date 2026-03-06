@@ -155,6 +155,7 @@
     "education": "教育经历",
     "experience": "工作经历",
     "projects": "项目经历",
+    "internship": "实习经历",
     "skills": "个人技能",
     "awards": "荣誉奖项",
     "certificates": "资质证书",
@@ -166,6 +167,7 @@
     "education",
     "experience",
     "projects",
+    "internship",
     "skills",
     "awards",
     "certificates",
@@ -234,6 +236,18 @@
         ))
         if _has-content(items) {
           modules.push((id: "projects", title: section-title, payload: items))
+        }
+      }
+    } else if module-id == "internship" {
+      let raw = data.at("internship", default: none)
+      if raw != none {
+        let items = extract-items(raw)
+        let section-title = extract-title(raw, fallback: module-config.at(
+          "internship",
+          default: default-titles.at("internship"),
+        ))
+        if _has-content(items) {
+          modules.push((id: "internship", title: section-title, payload: items))
         }
       }
     } else if module-id == "skills" {

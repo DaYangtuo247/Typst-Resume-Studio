@@ -28,8 +28,11 @@ themes/my-theme/
 2. **education** - 教育经历
 3. **experience** - 工作经历
 4. **projects** - 项目经历
-5. **skills** - 个人技能
-6. **自定义模块** - 用户可以在 `data.yml` 中添加任意模块（如 `awards`、`certifications` 等）
+5. **internship** - 实习经历
+6. **skills** - 个人技能
+7. **awards** - 荣誉奖项
+8. **certificates** - 资质证书
+9. **自定义模块** - 用户可以在 `data.yml` 中添加任意其他模块
 
 ### 使用方法
 
@@ -64,6 +67,12 @@ themes/my-theme/
       render-section(module.title)
       for item in module.payload {
         render-project-item(item)
+      }
+    } else if module.id == "internship" {
+      // 渲染实习经历
+      render-section(module.title)
+      for item in module.payload {
+        render-internship-item(item)
       }
     } else if module.id == "skills" {
       // 渲染技能列表
@@ -100,6 +109,7 @@ module-config:
         - "education"
         - "experience"
         - "projects"
+        - "internship"
         - "skills"
         - "awards"
         - "certificates"
@@ -228,6 +238,7 @@ module-config:
         - "education"
         - "experience"
         - "projects"
+        - "internship"
         - "skills"
         - "awards"
         - "certificates"
@@ -310,6 +321,23 @@ projects:
           start: ""
           end: ""
           url: "" # 项目链接（可选）
+          github: "" # GitHub 链接（可选）
+          details:
+              - "..."
+```
+
+### 实习经历 (internship)
+
+```yaml
+internship:
+    title: "实习经历"
+    items:
+        - name: "" # 项目/公司名称
+          role: "" # 担任角色
+          start: ""
+          end: ""
+          url: "" # 项目链接（可选）
+          github: "" # GitHub 链接（可选）
           details:
               - "..."
 ```

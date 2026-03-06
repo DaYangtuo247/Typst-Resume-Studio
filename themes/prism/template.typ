@@ -209,9 +209,12 @@
           for d in details { list(markup(d)) }
           v(0.5em)
         }
-      } else if module.id == "experience" {
+      } else if module.id == "experience" or module.id == "internship" {
         for exp in module.payload {
-          exp-header(exp.company, exp.position, exp.start + " - " + exp.end)
+          // 兼容两种字段命名：company/name, position/role
+          let company = exp.at("company", default: exp.at("name", default: ""))
+          let position = exp.at("position", default: exp.at("role", default: ""))
+          exp-header(company, position, exp.start + " - " + exp.end)
           let details = exp.at("details", default: ())
           for d in details {
             if d.starts-with("-") or d.ends-with("：") {
@@ -225,7 +228,12 @@
         }
       } else if module.id == "projects" {
         for proj in module.payload {
-          exp-header(proj.name, proj.role, proj.start + " - " + proj.end)
+          let proj-name = proj.name
+          let github = proj.at("github", default: "")
+          if github != "" {
+            proj-name = link(github, proj-name)
+          }
+          exp-header(proj-name, proj.role, proj.start + " - " + proj.end)
           let details = proj.at("details", default: ())
           for d in details { list(markup(d)) }
           v(0.5em)

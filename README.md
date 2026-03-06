@@ -58,3 +58,58 @@ python compile_previews.py --preview -f my_data.yml
 | ![](themes/classic/classic.png) | ![](themes/finance-blue/finance-blue.png) | ![](themes/modern/modern.png) |
 | Prism | Resume Ng | Tech Pro |
 | ![](themes/prism/prism.png) | ![](themes/resume-ng/resume-ng.png) | ![](themes/tech-pro/tech-pro.png) |
+
+## 🎨 开发新主题
+
+想要为这个项目贡献自己的主题设计？非常欢迎！
+
+### 快速指南
+
+1. **核心文件**：
+    - `themes/module-core.typ` - 模块化渲染协议和工具函数
+    - `themes/DEVELOP.md` - 完整的主题开发规范文档
+
+2. **目录结构**：
+
+    ```
+    themes/your-theme/
+    ├── template.typ    # 主题渲染逻辑，导出 blueprint() 函数
+    └── example.typ     # 独立预览入口
+    ```
+
+3. **推荐方式**：使用模块化协议
+
+    ```typst
+    #import "../module-core.typ": standard-modules
+
+    #let blueprint(data: (:), body) = {
+      let modules = standard-modules(data)
+
+      for module in modules {
+        if module.id == "resume-info" { /* 渲染头部 */ }
+        else if module.id == "education" { /* 渲染教育 */ }
+        else if module.id == "projects" { /* 渲染项目 */ }
+        else if module.id == "internship" { /* 渲染实习 */ }
+        else { /* 通用渲染 */ }
+      }
+    }
+    ```
+
+4. **支持的模块**：
+    - `resume-info` - 个人信息
+    - `education` - 教育经历
+    - `experience` - 工作经历
+    - `projects` - 项目经历
+    - `internship` - 实习经历
+    - `skills` - 个人技能
+    - `awards` - 荣誉奖项
+    - `certificates` - 资质证书
+
+5. **测试主题**：
+    ```bash
+    typst compile themes/your-theme/example.typ --root .
+    ```
+
+📖 **详细文档**：请查看 [themes/DEVELOP.md](themes/DEVELOP.md) 了解完整的开发规范、数据格式、最佳实践等。
+
+欢迎提交 PR 分享你的设计！🎉

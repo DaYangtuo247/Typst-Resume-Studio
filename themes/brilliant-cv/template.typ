@@ -158,6 +158,8 @@
   let experience = if type(raw-exp) == dictionary { raw-exp.at("items", default: ()) } else { raw-exp }
   let raw-proj = data.at("projects", default: ())
   let projects = if type(raw-proj) == dictionary { raw-proj.at("items", default: ()) } else { raw-proj }
+  let raw-intern = data.at("internship", default: ())
+  let internship = if type(raw-intern) == dictionary { raw-intern.at("items", default: ()) } else { raw-intern }
   let raw-certs = data.at("certificates", default: ())
   let certificates = if type(raw-certs) == dictionary { raw-certs.at("items", default: ()) } else { raw-certs }
   let raw-skills = data.at("skills", default: ())
@@ -231,14 +233,28 @@
   }
 
   // ══════════════════════════════════════════════════
-  // 职业经历
+  // 职业经历 & 实习经历
   // ══════════════════════════════════════════════════
   if experience.len() > 0 {
     cv-section("职业经历")
     for exp in experience {
       cv-entry(
-        title: exp.at("position", default: ""),
-        society: exp.at("company", default: ""),
+        title: exp.at("position", default: exp.at("role", default: "")),
+        society: exp.at("company", default: exp.at("name", default: "")),
+        date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
+        description: if exp.at("details", default: ()).len() > 0 {
+          list(..exp.at("details", default: ()))
+        },
+      )
+    }
+  }
+
+  if internship.len() > 0 {
+    cv-section("实习经历")
+    for exp in internship {
+      cv-entry(
+        title: exp.at("position", default: exp.at("role", default: "")),
+        society: exp.at("company", default: exp.at("name", default: "")),
         date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
         description: if exp.at("details", default: ()).len() > 0 {
           list(..exp.at("details", default: ()))
@@ -263,6 +279,7 @@
       )
     }
   }
+
 
   // ══════════════════════════════════════════════════
   // 证书

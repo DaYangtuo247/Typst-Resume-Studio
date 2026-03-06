@@ -207,29 +207,33 @@
     }
   }
 
-  // Projects
-  if "projects" in data {
-    let raw-proj = data.at("projects", default: ())
-    let proj-items = extract-items(raw-proj)
-    let proj-title = extract-title(raw-proj, fallback: "项目经历")
-    if proj-items.len() > 0 {
-      resume-section(proj-title)
-      for proj in proj-items {
-        resume-project(
-          title: proj.at("title", default: proj.at("name", default: "")),
-          duty: proj.at("duty", default: proj.at("role", default: "")),
-          start: proj.at("start", default: ""),
-          end: proj.at("end", default: ""),
-        )[
-          #let details = proj.at("details", default: proj.at("description", default: ""))
-          #if type(details) == str {
-            eval(details, mode: "markup")
-          } else if type(details) == array {
-            for item in details {
-              [- #eval(item, mode: "markup")]
+  // Projects & Internship
+  for section-key in ("projects", "internship") {
+    if section-key in data {
+      let raw-data = data.at(section-key, default: ())
+      let items = extract-items(raw-data)
+      let section-title = extract-title(raw-data, fallback: if section-key == "projects" { "项目经历" } else {
+        "实习经历"
+      })
+      if items.len() > 0 {
+        resume-section(section-title)
+        for item in items {
+          resume-project(
+            title: item.at("title", default: item.at("name", default: "")),
+            duty: item.at("duty", default: item.at("role", default: "")),
+            start: item.at("start", default: ""),
+            end: item.at("end", default: ""),
+          )[
+            #let details = item.at("details", default: item.at("description", default: ""))
+            #if type(details) == str {
+              eval(details, mode: "markup")
+            } else if type(details) == array {
+              for detail in details {
+                [- #eval(detail, mode: "markup")]
+              }
             }
-          }
-        ]
+          ]
+        }
       }
     }
   }

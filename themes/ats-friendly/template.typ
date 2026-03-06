@@ -219,6 +219,7 @@
   let technical-skills = data.at("technical-skills", default: ())
   let experience = data.at("experience", default: ())
   let projects = data.at("projects", default: ())
+  let internship = data.at("internship", default: ())
   let education = data.at("education", default: ())
 
   let merged-settings = _default-settings
@@ -254,6 +255,7 @@
     technical-skills: technical-skills,
     experience: experience,
     projects: projects,
+    internship: internship,
     education: education,
   )
 }
@@ -310,6 +312,28 @@
     ))
   }
 
+  let internship = ()
+  let raw-intern = data.at("internship", default: ())
+  let intern-items = if type(raw-intern) == dictionary { raw-intern.at("items", default: ()) } else { raw-intern }
+  for p in intern-items {
+    let highlights = if "details" in p {
+      p.at("details", default: ())
+    } else if "description" in p {
+      (_safe(p.at("description", default: "")),)
+    } else {
+      ()
+    }
+
+    internship.push((
+      name: _safe(p.at("name", default: "")),
+      start-date: _safe(p.at("start", default: "")),
+      end-date: _safe(p.at("end", default: "")),
+      tech-used: _safe(p.at("tech-used", default: _safe(p.at("role", default: ""))), fallback: ""),
+      url: _safe(p.at("url", default: _safe(p.at("github", default: ""))), fallback: ""),
+      highlights: highlights,
+    ))
+  }
+
   let education = ()
   let raw-edu = data.at("education", default: ())
   let edu-items = if type(raw-edu) == dictionary { raw-edu.at("items", default: ()) } else { raw-edu }
@@ -336,6 +360,7 @@
     technical-skills: technical-skills,
     experience: experience,
     projects: projects,
+    internship: internship,
     education: education,
   ))
 }
@@ -382,6 +407,7 @@
   let technical-skills = normalized.at("technical-skills", default: ())
   let experience = normalized.experience
   let projects = normalized.projects
+  let internship = normalized.at("internship", default: ())
   let education = normalized.education
 
   show: resume.with(
@@ -417,16 +443,19 @@
     }
   }
 
-  if projects.len() > 0 {
-    [== Projects]
-    for p in projects {
-      project(
-        name: _safe(p.at("name", default: "")),
-        dates: _date(p.at("start-date", default: ""), p.at("end-date", default: "")),
-        tech-used: _safe(p.at("tech-used", default: "")),
-        url: _safe(p.at("url", default: "")),
-      )
-      _render-bullets(p.at("highlights", default: ()))
+  // Projects & Internship (use same rendering logic)
+  for (section-data, section-title) in ((projects, "Projects"), (internship, "Internship")) {
+    if section-data.len() > 0 {
+      [== #section-title]
+      for p in section-data {
+        project(
+          name: _safe(p.at("name", default: "")),
+          dates: _date(p.at("start-date", default: ""), p.at("end-date", default: "")),
+          tech-used: _safe(p.at("tech-used", default: "")),
+          url: _safe(p.at("url", default: "")),
+        )
+        _render-bullets(p.at("highlights", default: ()))
+      }
     }
   }
 
