@@ -61,11 +61,7 @@
 // ──────────────────────────────────────────────────
 #let cv-section(title) = {
   v(1pt)
-  let highlighted = title.slice(0, calc.min(3, title.len()))
-  let normal = title.slice(calc.min(3, title.len()))
-
-  text(size: 16pt, weight: "bold", fill: accent-color, highlighted)
-  text(size: 16pt, weight: "bold", fill: black, normal)
+  text(size: 16pt, weight: "bold", fill: accent-color, title)
   h(2pt)
   box(width: 1fr, line(stroke: 0.9pt, length: 100%))
 }
