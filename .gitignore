@@ -1,0 +1,14 @@
+# 编译产物
+*.pdf
+downloaded_templates/
+AGENTS.md
+
+# macOS
+.DS_Store
+
+# 编辑器
+.vscode/
+.github/
+.gemini/
+.idea/
+myself/
