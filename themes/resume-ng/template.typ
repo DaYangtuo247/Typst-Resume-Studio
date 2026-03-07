@@ -11,13 +11,13 @@
   array-to-str(contact)
 }
 
-#let project(title: "", author: (), contacts: (), body) = {
+#let project(title: "", author: (), contacts: (), fonts: (), body) = {
   set document(author: author.name, title: title)
   set page(
     margin: (x: 1cm, y: 1cm),
   )
 
-  set text(font: ("Times New Roman", "Heiti SC", "PingFang SC", "STHeiti"), lang: "zh")
+  set text(font: fonts, lang: "zh")
 
   align(center)[
     #block(text(weight: 700, 1.7em, author.name))
@@ -97,8 +97,10 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-#let blueprint(data: (:), body) = {
+#let blueprint(data: (:), fonts-global: (), body) = {
   let info = data.at("resume-info", default: (:))
+  let fonts-theme = ("Times New Roman", "Heiti SC", "PingFang SC", "STHeiti")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   // Header Config
   let author-name = info.at("name", default: "冯开宇")
@@ -119,6 +121,7 @@
     title: data.at("title", default: "Resume"),
     author: (name: author-name),
     contacts: contacts,
+    fonts: fonts-effective,
   )
 
   // Education

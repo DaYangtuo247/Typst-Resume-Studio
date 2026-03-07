@@ -71,6 +71,7 @@
 
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   let modules = standard-modules(data)
@@ -80,11 +81,12 @@
   let avatar = resume-info.at("avatar", default: "")
   let contacts = resume-info.at("contacts", default: ())
 
-  let fonts-theme = ("Times New Roman", "Heiti SC", "PingFang SC")
+  let fonts-theme = ("Noto Serif SC", "Times New Roman", "Heiti SC", "PingFang SC")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   set document(author: name, title: name + " 的简历")
   set page(margin: (x: 1.5cm, y: 1.5cm))
-  set text(font: fonts-theme, lang: "zh", size: 9.5pt, fill: rgb("#3a3a3a"))
+  set text(font: fonts-effective, lang: "zh", size: 9.5pt, fill: rgb("#3a3a3a"))
   set par(justify: true)
 
   set list(indent: 0.5em, body-indent: 0.5em)

@@ -4,6 +4,11 @@
 # ============================================
 # 模块配置
 # ============================================
+global-font:
+    # 全局字体优先，主题字体兜底（按顺序回退）
+    # fonts: ["LXGW WenKai", "Noto Serif SC"]
+    fonts: []
+
 module-config:
     module-order:
         - "resume-info"

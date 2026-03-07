@@ -149,7 +149,7 @@
 // ══════════════════════════════════════════════════
 // 主模板函数
 // ══════════════════════════════════════════════════
-#let blueprint(data: (:), body) = {
+#let blueprint(data: (:), fonts-global: (), body) = {
   // ── 提取数据 ──────────────────────────────────────
   let resume-info = data.at("resume-info", default: (:))
   let raw-edu = data.at("education", default: ())
@@ -173,9 +173,12 @@
     none
   }
 
+  let fonts-theme = ("Heiti SC", "Songti SC")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
+
   // ── 页面设置 ──────────────────────────────────────
   set text(
-    font: ("Heiti SC", "Songti SC"),
+    font: fonts-effective,
     size: 9pt,
     fill: lightgray,
   )

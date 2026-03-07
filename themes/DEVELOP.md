@@ -4,6 +4,32 @@
 
 ---
 
+## 字体覆盖与校验（重要）
+
+本项目已支持全局字体优先：`resume.typ` 会把 `data.yml` 中的 `global-font.fonts` 传入主题的 `fonts-global` 参数。
+
+主题侧推荐模式：
+
+```typst
+#let fonts-theme = ("Heiti SC", "PingFang SC")
+#let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
+#set text(font: fonts-effective)
+```
+
+请注意：
+
+1. 字体族名称必须与 Typst 识别名称一致（可用 `typst fonts --font-path fonts` 查询）。
+2. 如果依赖仓库内 `fonts/` 目录字体，编译时必须传 `--font-path fonts`。
+3. 开发/发布前建议执行严格字体检查，避免“本机有字体、他人环境缺失”问题：
+
+```bash
+python compile_previews.py --preview --strict-fonts
+```
+
+4. 避免在局部 `text(...)` 中硬编码其他字体（如 `font: "Arial"`），否则会绕过全局字体覆盖。
+
+---
+
 ## 1. 目录结构规范
 
 每一个新主题必须放置在 `themes/<主题名>/` 目录下，并且至少包含以下两个核心文件：
@@ -133,18 +159,20 @@ awards:
 
 ## 3. 接口标准规范（传统方式）
 
-如果不使用模块化协议，`template.typ` 必须导出一个名为 `blueprint` 的入口函数，并接收 `data` 字典作为参数。**字体完全由主题自主决定**，在 `blueprint` 内部定义：
+如果不使用模块化协议，`template.typ` 必须导出一个名为 `blueprint` 的入口函数，并接收 `data` 字典作为参数。推荐同时支持可选参数 `fonts-global`，用于接收来自 `resume.typ` 的全局字体列表，实现“全局字体优先、主题字体兜底”。
 
 ```typst
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   // 主题字体配置（由主题作者决定）
   let fonts-theme = ("Heiti SC", "Heiti SC")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   // 应用字体
-  set text(font: fonts-theme)
+  set text(font: fonts-effective)
 
   // 渲染逻辑...
 }

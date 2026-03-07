@@ -394,6 +394,7 @@
 
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   let normalized = if "resume-info" in data {
@@ -409,6 +410,19 @@
   let projects = normalized.projects
   let internship = normalized.at("internship", default: ())
   let education = normalized.education
+  let settings-font = settings.at("font", default: "New Computer Modern")
+  let settings-font-list = if type(settings-font) == array {
+    settings-font
+  } else if type(settings-font) == str and settings-font != "" {
+    (settings-font,)
+  } else {
+    ()
+  }
+  let fonts-effective = if fonts-global.len() > 0 {
+    (..fonts-global, ..settings-font-list)
+  } else {
+    settings-font
+  }
 
   show: resume.with(
     author: _safe(personal.at("name", default: "")),
@@ -417,7 +431,7 @@
     personal-info-position: center,
     color-enabled: settings.at("color-enabled", default: false),
     text-color: settings.at("text-color", default: "#000080"),
-    font: settings.at("font", default: "New Computer Modern"),
+    font: fonts-effective,
     paper: settings.at("paper", default: "us-letter"),
     author-font-size: _length-or(settings.at("author-font-size", default: 20pt), 20pt),
     font-size: _length-or(settings.at("font-size", default: 10pt), 10pt),

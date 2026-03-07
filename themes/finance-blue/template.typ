@@ -96,6 +96,7 @@
 
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   let modules = standard-modules(data)
@@ -105,10 +106,11 @@
 
   // 字体设置，模拟图片中的字体观感
   let fonts-theme = ("Times New Roman", "Heiti SC")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   set document(author: name, title: name + " 的简历")
   set page(margin: (x: 1.5cm, y: 1.5cm))
-  set text(font: fonts-theme, lang: "zh", size: 10.5pt)
+  set text(font: fonts-effective, lang: "zh", size: 10.5pt)
 
   // 列表样式（使用实心圆点，与图片一致）
   set list(marker: [•])

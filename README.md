@@ -24,6 +24,9 @@
 # 编译主简历 (使用 resume.typ 中指定的主题)
 typst compile resume.typ
 
+# 若使用本地 fonts/ 目录中的字体，需显式指定字体路径
+typst compile resume.typ --font-path fonts
+
 # 预览特定主题 (以 modern 为例)
 typst compile themes/modern/example.typ --root .
 ```
@@ -45,6 +48,35 @@ python compile_previews.py --preview
 
 # 2. 使用指定的数据文件 (如 my_data.yml) 为所有主题生成预览
 python compile_previews.py --preview -f my_data.yml
+
+# 3. 严格字体检查：主题声明字体缺失时直接失败
+python compile_previews.py --preview --strict-fonts
+```
+
+## Font 配置与排错
+
+项目支持全局字体优先，主题字体兜底：
+
+```yaml
+global-font:
+    # 按顺序回退
+    fonts: ["Noto Serif SC"]
+```
+
+注意事项：
+
+1. 字体族名称必须与 Typst 识别到的名称完全一致。
+2. 如果字体放在仓库 `fonts/` 目录，`typst compile` 时必须加 `--font-path fonts`。
+3. 可用如下命令查看 Typst 实际识别到的字体族：
+
+```bash
+typst fonts --font-path fonts
+```
+
+4. 批量预览推荐开启严格模式，缺失字体会明确报错：
+
+```bash
+python compile_previews.py --pdf --strict-fonts
 ```
 
 ## 🎨 主题

@@ -81,6 +81,7 @@
 
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   // 获取所有模块（使用模块化协议）
@@ -93,11 +94,12 @@
 
   // 主题字体配置
   let fonts-theme = ("Heiti SC", "Heiti SC")
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   // 页面和文字样式设置
   set document(author: name, title: name + " 的简历")
   set page(margin: (x: 1cm, y: 1cm))
-  set text(font: fonts-theme, lang: "zh")
+  set text(font: fonts-effective, lang: "zh")
 
   // ─────────────────────────────────────────────────────────
   //  简历头部

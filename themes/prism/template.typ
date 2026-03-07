@@ -66,6 +66,7 @@
 // ==========================================
 #let blueprint(
   data: (:),
+  fonts-global: (),
   body,
 ) = {
   let modules = standard-modules(data)
@@ -83,6 +84,7 @@
     "Helvetica Neue",
     "Arial",
   )
+  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
   // 装饰元素定位参数
   let axis-x = -0.7cm
@@ -118,7 +120,7 @@
   )
 
   set text(
-    font: fonts-theme,
+    font: fonts-effective,
     size: 10.5pt,
     fill: rgb("#222222"),
   )
