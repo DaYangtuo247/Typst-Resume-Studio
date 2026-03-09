@@ -7,7 +7,7 @@
 #let lightgray = rgb("#343a40")
 #let darkgray = rgb("#212529")
 
-#import "../module-core.typ": render-contacts
+#import "../module-core.typ": markup, render-contacts
 
 #let _resume-info(data) = {
   data.at("information", default: (:))
@@ -51,7 +51,7 @@
       size: 32pt,
       weight: "bold",
       fill: darkgray,
-      name,
+      markup(name),
     )
 
     v(6pt)
@@ -115,8 +115,8 @@
       inset: 0pt,
       stroke: 0pt,
       row-gutter: 6pt,
-      text(size: 10pt, weight: "bold", title),
-      text(size: 8pt, fill: accent-color, weight: "medium", smallcaps(society)),
+      text(size: 10pt, weight: "bold", markup(title)),
+      text(size: 8pt, fill: accent-color, weight: "medium", smallcaps(markup(society))),
     ),
     // 右列：日期
     table(
@@ -125,9 +125,9 @@
       stroke: 0pt,
       row-gutter: 6pt,
       align: right,
-      text(weight: "medium", fill: accent-color, style: "oblique", date),
+      text(weight: "medium", fill: accent-color, style: "oblique", markup(date)),
       if location != "" {
-        text(size: 8pt, weight: "medium", fill: gray, style: "oblique", location)
+        text(size: 8pt, weight: "medium", fill: gray, style: "oblique", markup(location))
       } else {
         []
       },
@@ -137,7 +137,7 @@
   // 描述
   if description != none and description != [] {
     v(1pt)
-    text(fill: lightgray, description)
+    text(fill: lightgray, if type(description) == str { markup(description) } else { description })
   }
 }
 
@@ -151,9 +151,9 @@
     inset: 0pt,
     stroke: 0pt,
     gutter: 6pt,
-    text(size: 9pt, weight: "bold", fill: accent-color, date),
-    text(size: 9pt, weight: "medium", title),
-    text(size: 9pt, fill: lightgray, style: "italic", issuer),
+    text(size: 9pt, weight: "bold", fill: accent-color, markup(date)),
+    text(size: 9pt, weight: "medium", markup(title)),
+    text(size: 9pt, fill: lightgray, style: "italic", markup(issuer)),
   )
 }
 
@@ -161,13 +161,16 @@
 // 技能条目
 // ──────────────────────────────────────────────────
 #let cv-skill(type: "", info: "") = {
+  let type-text = markup(str(type))
+  let info-text = markup(str(info))
+
   v(1pt)
   table(
     columns: (16%, 1fr),
     inset: 0pt,
     stroke: 0pt,
     gutter: 6pt,
-    text(size: 9pt, weight: "bold", fill: accent-color, type), text(size: 9pt, info),
+    text(size: 9pt, weight: "bold", fill: accent-color, type-text), text(size: 9pt, info-text),
   )
 }
 
@@ -226,14 +229,14 @@
 
   let motto = resume-info.at("motto", default: "")
   if motto != "" {
-    text(size: 9pt, style: "italic", fill: lightgray)[\"#motto\"]
+    text(size: 9pt, style: "italic", fill: lightgray)[\"#markup(motto)\"]
     v(6pt)
   }
 
   let summary = resume-info.at("summary", default: "")
   if summary != "" {
     cv-section("个人简介")
-    text(size: 9pt, fill: lightgray, summary)
+    text(size: 9pt, fill: lightgray, markup(summary))
     v(4pt)
   }
 
@@ -248,7 +251,7 @@
         society: edu.at("school", default: ""),
         date: edu.at("start", default: "") + " - " + edu.at("end", default: ""),
         description: if edu.at("details", default: ()).len() > 0 {
-          list(..edu.at("details", default: ()))
+          list(..edu.at("details", default: ()).map(d => markup(d)))
         },
       )
     }
@@ -265,7 +268,7 @@
         society: exp.at("company", default: exp.at("name", default: "")),
         date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
         description: if exp.at("details", default: ()).len() > 0 {
-          list(..exp.at("details", default: ()))
+          list(..exp.at("details", default: ()).map(d => markup(d)))
         },
       )
     }
@@ -279,7 +282,7 @@
         society: exp.at("company", default: exp.at("name", default: "")),
         date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
         description: if exp.at("details", default: ()).len() > 0 {
-          list(..exp.at("details", default: ()))
+          list(..exp.at("details", default: ()).map(d => markup(d)))
         },
       )
     }
@@ -296,7 +299,7 @@
         society: proj.at("name", default: ""),
         date: proj.at("start", default: "") + " - " + proj.at("end", default: ""),
         description: if proj.at("details", default: ()).len() > 0 {
-          list(..proj.at("details", default: ()))
+          list(..proj.at("details", default: ()).map(d => markup(d)))
         },
       )
     }
@@ -348,7 +351,7 @@
           if items.len() > 0 {
             cv-skill(
               type: category,
-              info: items.join(h-bar()),
+              info: items.join(" | "),
             )
           }
         }
@@ -383,7 +386,7 @@
   let self-evaluation = resume-info.at("self-evaluation", default: "")
   if self-evaluation != "" {
     cv-section("自我评价")
-    text(size: 9pt, fill: lightgray, self-evaluation)
+    text(size: 9pt, fill: lightgray, markup(self-evaluation))
     v(4pt)
   }
 

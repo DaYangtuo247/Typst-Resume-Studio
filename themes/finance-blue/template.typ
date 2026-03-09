@@ -43,7 +43,9 @@
   grid(
     columns: (1.2fr, 2fr, 1.2fr),
     align: (left, center, right),
-    text(weight: "bold", left-text), text(weight: "bold", center-text), text(weight: "bold", right-text),
+    text(weight: "bold", markup(left-text)),
+    text(weight: "bold", markup(center-text)),
+    text(weight: "bold", markup(right-text)),
   )
   v(0.3em)
   body

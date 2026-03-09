@@ -34,15 +34,15 @@
 
 #let resume-item-header(title: "", subtitle: "", date: "") = {
   let left-part = if subtitle != "" {
-    strong(title) + text(fill: black, weight: "regular")[#delimiter] + subtitle
+    strong(markup(title)) + text(fill: black, weight: "regular")[#delimiter] + markup(subtitle)
   } else {
-    strong(title)
+    strong(markup(title))
   }
 
   grid(
     columns: (1fr, auto),
     align: (left, right),
-    text(fill: black, size: 11pt, left-part), text(fill: black, size: 10.5pt, date),
+    text(fill: black, size: 11pt, left-part), text(fill: black, size: 10.5pt, markup(date)),
   )
   v(0.4em)
 }

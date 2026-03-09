@@ -56,12 +56,12 @@
 #let resume-item(title: "", position: "", detail: "", time: "") = {
   grid(
     columns: (1fr, auto),
-    [*#title*], [#time],
+    [*#markup(title)*], [#markup(time)],
   )
   if position != "" {
     grid(
       columns: (1fr, auto),
-      [#position], if detail != "" { [#detail] } else { [] },
+      [#markup(position)], if detail != "" { [#markup(detail)] } else { [] },
     )
   }
   v(0.3em)
@@ -191,7 +191,7 @@
       if type(module.payload) == array {
         list(..module.payload.map(item => {
           if type(item) == str {
-            [#item]
+            [#markup(item)]
           } else if type(item) == dictionary {
             render-dict-item(item)
           } else {

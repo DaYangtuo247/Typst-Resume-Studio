@@ -37,7 +37,11 @@
 }
 
 #let resume-education(university: "", degree: "", school: "", start: "", end: "", body) = {
-  let left = (strong(university), school, degree)
+  let left = (
+    strong(markup(university)),
+    if school != "" { markup(school) } else { [] },
+    if degree != "" { markup(degree) } else { [] },
+  )
   let right = resume-date(start, end: end)
 
   resume-item(
@@ -48,7 +52,7 @@
 }
 
 #let resume-work(company: "", duty: "", start: "", end: "", body) = {
-  let left = (strong(company), duty)
+  let left = (strong(markup(company)), if duty != "" { markup(duty) } else { [] })
   let right = resume-date(start, end: end)
 
   resume-item(
@@ -59,7 +63,7 @@
 }
 
 #let resume-project(title: "", duty: "", start: "", end: "", body) = {
-  let left = (strong(title), duty)
+  let left = (strong(markup(title)), if duty != "" { markup(duty) } else { [] })
   let right = resume-date(start, end: end)
 
   resume-item(
@@ -192,7 +196,7 @@
       if type(module.payload) == array {
         list(..module.payload.map(item => {
           if type(item) == str {
-            [#item]
+            [#markup(item)]
           } else if type(item) == dictionary {
             render-dict-item(item)
           } else {

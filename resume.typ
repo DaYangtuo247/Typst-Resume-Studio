@@ -1,8 +1,8 @@
 // 1. 主题选择
-#import "themes/prism/template.typ": blueprint
+#import "themes/avatar-pro/template.typ": blueprint
 
 // 2. 数据加载
-#let data = yaml("data.yml")
+#let data = yaml("myself/wuqiling.yml")
 
 // 3. 全局字体（可选）：优先于主题字体，主题字体作为兜底
 #let global-font-config = data.at("global-font", default: (:))

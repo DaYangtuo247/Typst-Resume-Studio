@@ -206,7 +206,7 @@
     section-block(module.title, axis-x, section-notch-right-x, title-overlap, {
       if module.id == "education" {
         for edu in module.payload {
-          exp-header(edu.school, edu.degree + " " + edu.major, edu.start + " - " + edu.end)
+          exp-header(markup(edu.school), markup(edu.degree + " " + edu.major), markup(edu.start + " - " + edu.end))
           let details = edu.at("details", default: ())
           for d in details { list(markup(d)) }
           v(0.5em)
@@ -216,7 +216,7 @@
           // 兼容两种字段命名：company/name, position/role
           let company = exp.at("company", default: exp.at("name", default: ""))
           let position = exp.at("position", default: exp.at("role", default: ""))
-          exp-header(company, position, exp.start + " - " + exp.end)
+          exp-header(markup(company), markup(position), markup(exp.start + " - " + exp.end))
           let details = exp.at("details", default: ())
           for d in details {
             if d.starts-with("-") or d.ends-with("：") {
@@ -233,9 +233,11 @@
           let proj-name = proj.name
           let github = proj.at("github", default: "")
           if github != "" {
-            proj-name = link(github, proj-name)
+            proj-name = link(github, markup(proj-name))
+          } else {
+            proj-name = markup(proj-name)
           }
-          exp-header(proj-name, proj.role, proj.start + " - " + proj.end)
+          exp-header(proj-name, markup(proj.role), markup(proj.start + " - " + proj.end))
           let details = proj.at("details", default: ())
           for d in details { list(markup(d)) }
           v(0.5em)
@@ -246,7 +248,7 @@
         for award in module.payload {
           grid(
             columns: (1fr, auto),
-            markup(award.title), text(font: "Helvetica Neue", award.date),
+            markup(award.title), text(font: "Helvetica Neue", markup(award.date)),
           )
           v(0.4em)
         }
@@ -254,8 +256,8 @@
         for cert in module.payload {
           grid(
             columns: (1fr, auto),
-            [*#cert.at("name", default: "")* #if cert.at("org", default: "") != "" { [ — #cert.at("org", default: "")] }],
-            text(font: "Helvetica Neue", cert.at("date", default: "")),
+            [*#markup(cert.at("name", default: ""))* #if cert.at("org", default: "") != "" { [ — #markup(cert.at("org", default: ""))] }],
+            text(font: "Helvetica Neue", markup(cert.at("date", default: ""))),
           )
           v(0.4em)
         }
@@ -263,7 +265,7 @@
         if type(module.payload) == array {
           for item in module.payload {
             if type(item) == str {
-              list(item)
+              list(markup(item))
             } else if type(item) == dictionary {
               list(render-dict-item(item))
             } else {

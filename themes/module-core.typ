@@ -23,7 +23,7 @@
   let desc = item.at("description", default: item.at("org", default: ""))
   let date = item.at("date", default: "")
   if title != "" {
-    [*#title* #if date != "" { [ (#date)] } #if desc != "" { [ — #desc] }]
+    [*#markup(str(title))* #if date != "" { [ (#markup(str(date)))] } #if desc != "" { [ — #markup(str(desc))] }]
   } else {
     let parts = ()
     for (k, v) in item {

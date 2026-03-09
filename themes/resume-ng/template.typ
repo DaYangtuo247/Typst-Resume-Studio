@@ -1,4 +1,4 @@
-#import "../module-core.typ": extract-items, extract-title, render-contact
+#import "../module-core.typ": extract-items, extract-title, markup, render-contact
 
 #let _resume-info(data) = {
   data.at("information", default: (:))
@@ -89,8 +89,11 @@
 }
 
 #let resume-item(left: "", right: "", body) = {
-  text(size: 12pt, place(end, right))
-  text(size: 12pt, left)
+  let right-text = if type(right) == str { markup(right) } else { right }
+  let left-text = if type(left) == str { markup(left) } else { left }
+
+  text(size: 12pt, place(end, right-text))
+  text(size: 12pt, left-text)
   linebreak()
   body
 }
@@ -206,11 +209,17 @@
           let parts = (name,)
           if level != "" { parts.push(level) }
           if description != "" { parts.push(description) }
-          [- #parts.join("：")]
+          [- #markup(parts.join("："))]
         } else if "title" in s {
-          [*#s.title:* ]
+          [*#markup(s.title):* ]
           if "items" in s {
-            eval(s.items, mode: "markup")
+            if type(s.items) == array {
+              for item in s.items {
+                [- #markup(item)]
+              }
+            } else {
+              markup(s.items)
+            }
           }
         }
       }
@@ -284,7 +293,7 @@
         [- #eval(award, mode: "markup")]
       } else if type(award) == dictionary {
         [
-          - *#award.at("title", default: "")* #if award.at("date", default: "") != "" { [(#award.at("date", default: ""))] }
+          - *#markup(award.at("title", default: ""))* #if award.at("date", default: "") != "" { [(#markup(award.at("date", default: "")))] }
         ]
       }
     }
@@ -298,10 +307,10 @@
     for cert in cert-section.items {
       if type(cert) == dictionary {
         [
-          - *#cert.at("name", default: "")* #if cert.at("date", default: "") != "" { [(#cert.at("date", default: ""))] } #if cert.at("org", default: "") != "" { [ — #cert.at("org", default: "")] }
+          - *#markup(cert.at("name", default: ""))* #if cert.at("date", default: "") != "" { [(#markup(cert.at("date", default: "")))] } #if cert.at("org", default: "") != "" { [ — #markup(cert.at("org", default: ""))] }
         ]
       } else {
-        [- #str(cert)]
+        [- #markup(str(cert))]
       }
     }
   }
@@ -328,13 +337,13 @@
     let summary = resume-info.at("summary", default: "")
     if summary != "" {
       resume-section("个人简介")
-      [#summary]
+      [#markup(summary)]
     }
 
     let self-evaluation = resume-info.at("self-evaluation", default: "")
     if self-evaluation != "" {
       resume-section("自我评价")
-      [#self-evaluation]
+      [#markup(self-evaluation)]
     }
 
     let interests = resume-info.at("interests", default: ())

@@ -1,4 +1,4 @@
-#import "../module-core.typ": render-contacts
+#import "../module-core.typ": markup, render-contacts
 
 #let resume(
   // Name of the author (you)
@@ -396,18 +396,18 @@
         let parts = (name,)
         if level != "" { parts.push(level) }
         if description != "" { parts.push(description) }
-        [- #parts.join("：")]
+        [- #markup(parts.join("："))]
       } else {
         let title = item.at("title", default: item.at("category", default: ""))
         let value = item.at("value", default: item.at("items", default: ""))
         if title != "" {
-          [- *#title*: #(if type(value) == array { value.join(", ") } else { value })]
+          [- *#markup(str(title))*: #(if type(value) == array { markup(value.join(", ")) } else { markup(str(value)) })]
         } else {
-          [- #(if type(value) == array { value.join(", ") } else { value })]
+          [- #(if type(value) == array { markup(value.join(", ")) } else { markup(str(value)) })]
         }
       }
     } else if _safe(item) != "" {
-      [- #item]
+      [- #markup(str(item))]
     }
   }
 }
@@ -426,10 +426,18 @@
   let settings = normalized.settings
   let personal = normalized.personal
   let technical-skills = normalized.at("technical-skills", default: ())
-  let experience = normalized.experience
-  let projects = normalized.projects
-  let internship = normalized.at("internship", default: ())
-  let education = normalized.education
+  let experience-raw = normalized.experience
+  let projects-raw = normalized.projects
+  let internship-raw = normalized.at("internship", default: ())
+  let education-raw = normalized.education
+  let experience = if type(experience-raw) == dictionary { experience-raw.at("items", default: ()) } else {
+    experience-raw
+  }
+  let projects = if type(projects-raw) == dictionary { projects-raw.at("items", default: ()) } else { projects-raw }
+  let internship = if type(internship-raw) == dictionary { internship-raw.at("items", default: ()) } else {
+    internship-raw
+  }
+  let education = if type(education-raw) == dictionary { education-raw.at("items", default: ()) } else { education-raw }
   let settings-font = settings.at("font", default: "New Computer Modern")
   let settings-font-list = if type(settings-font) == array {
     settings-font
@@ -531,13 +539,13 @@
     let summary = resume-info.at("summary", default: "")
     if summary != "" {
       [== Summary]
-      [#summary]
+      [#markup(summary)]
     }
 
     let self-evaluation = resume-info.at("self-evaluation", default: "")
     if self-evaluation != "" {
       [== Self Evaluation]
-      [#self-evaluation]
+      [#markup(self-evaluation)]
     }
 
     let interests = resume-info.at("interests", default: ())
@@ -557,10 +565,10 @@
     for award in awards {
       if type(award) == dictionary {
         [
-          - *#award.at("title", default: "")* #if award.at("date", default: "") != "" { [  (#award.at("date", default: ""))] }
+          - *#markup(award.at("title", default: ""))* #if award.at("date", default: "") != "" { [  (#markup(award.at("date", default: "")))] }
         ]
       } else {
-        [- #str(award)]
+        [- #markup(str(award))]
       }
     }
   }
@@ -575,10 +583,10 @@
     for cert in certificates {
       if type(cert) == dictionary {
         [
-          - *#cert.at("name", default: "")* #if cert.at("date", default: "") != "" { [(#cert.at("date", default: ""))] } #if cert.at("org", default: "") != "" { [ — #cert.at("org", default: "")] }
+          - *#markup(cert.at("name", default: ""))* #if cert.at("date", default: "") != "" { [(#markup(cert.at("date", default: "")))] } #if cert.at("org", default: "") != "" { [ — #markup(cert.at("org", default: ""))] }
         ]
       } else {
-        [- #str(cert)]
+        [- #markup(str(cert))]
       }
     }
   }

@@ -25,10 +25,16 @@
 // ─────────────────────────────────────────────────────────
 
 #let resume-item-header(date: "", title: "", subtitle: "") = {
+  let left-text = if subtitle != "" {
+    [#markup(title) - #markup(subtitle)]
+  } else {
+    markup(title)
+  }
+
   grid(
-    columns: (1.5fr, 3fr, 2fr),
-    align: (left, center, right),
-    strong(date), strong(title), strong(subtitle),
+    columns: (1fr, auto),
+    align: (left, right),
+    strong(left-text), strong(markup(date)),
   )
 }
 
@@ -181,16 +187,16 @@
         ]
         v(0.5em)
       }
-    } else if module.id == "projects" {
+    } else if module.id == "projects" or module.id == "internship" {
       resume-section(module.title)
-      for proj in module.payload {
+      for item in module.payload {
         resume-project(
-          title: proj.name,
-          duty: proj.role,
-          start: proj.start,
-          end: proj.end,
+          title: item.name,
+          duty: item.role,
+          start: item.start,
+          end: item.end,
         )[
-          #let details = proj.at("details", default: ())
+          #let details = item.at("details", default: ())
           #if details.len() > 0 {
             list(..details.map(d => markup(d)))
           }
