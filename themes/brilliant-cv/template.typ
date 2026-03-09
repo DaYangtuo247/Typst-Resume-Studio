@@ -9,6 +9,31 @@
 
 #import "../module-core.typ": render-contacts
 
+#let _resume-info(data) = {
+  data.at("information", default: (:))
+}
+
+#let _section-items(data, section-type) = {
+  let sections = data.at("content", default: data.at("sections", default: none))
+  if sections != none and type(sections) == array {
+    let items = ()
+    for section in sections {
+      if section.at("type", default: "") == section-type and section.at("enabled", default: true) {
+        let section-items = section.at("items", default: ())
+        if type(section-items) == array {
+          for item in section-items {
+            items.push(item)
+          }
+        }
+      }
+    }
+    return items
+  }
+
+  let raw = data.at(section-type, default: ())
+  if type(raw) == dictionary { raw.at("items", default: ()) } else { raw }
+}
+
 // 分隔符
 #let h-bar() = [#h(5pt) | #h(5pt)]
 
@@ -151,19 +176,13 @@
 // ══════════════════════════════════════════════════
 #let blueprint(data: (:), fonts-global: (), body) = {
   // ── 提取数据 ──────────────────────────────────────
-  let resume-info = data.at("resume-info", default: (:))
-  let raw-edu = data.at("education", default: ())
-  let education = if type(raw-edu) == dictionary { raw-edu.at("items", default: ()) } else { raw-edu }
-  let raw-exp = data.at("experience", default: ())
-  let experience = if type(raw-exp) == dictionary { raw-exp.at("items", default: ()) } else { raw-exp }
-  let raw-proj = data.at("projects", default: ())
-  let projects = if type(raw-proj) == dictionary { raw-proj.at("items", default: ()) } else { raw-proj }
-  let raw-intern = data.at("internship", default: ())
-  let internship = if type(raw-intern) == dictionary { raw-intern.at("items", default: ()) } else { raw-intern }
-  let raw-certs = data.at("certificates", default: ())
-  let certificates = if type(raw-certs) == dictionary { raw-certs.at("items", default: ()) } else { raw-certs }
-  let raw-skills = data.at("skills", default: ())
-  let skills = if type(raw-skills) == dictionary { raw-skills.at("items", default: ()) } else { raw-skills }
+  let resume-info = _resume-info(data)
+  let education = _section-items(data, "education")
+  let experience = _section-items(data, "experience")
+  let projects = _section-items(data, "projects")
+  let internship = _section-items(data, "internship")
+  let certificates = _section-items(data, "certificates")
+  let skills = _section-items(data, "skills")
 
   // 提取头像路径
   let avatar-path = resume-info.at("avatar", default: none)
@@ -342,8 +361,7 @@
   // ══════════════════════════════════════════════════
   // 荣誉奖项
   // ══════════════════════════════════════════════════
-  let raw-awards = data.at("awards", default: ())
-  let awards = if type(raw-awards) == dictionary { raw-awards.at("items", default: ()) } else { raw-awards }
+  let awards = _section-items(data, "awards")
   if awards.len() > 0 {
     cv-section("荣誉奖项")
     for award in awards {

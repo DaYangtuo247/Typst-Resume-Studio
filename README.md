@@ -12,7 +12,7 @@
 
 ## ✨ 特性
 
-- 📝 **完全数据驱动**：所有的个人信息、经历、项目都在 `data.yml` 中维护。对非程序员极度友好！
+- 📝 **完全数据驱动**：所有的个人信息、经历、项目都在 `data.yml` 中维护。默认使用 `information + content` 新结构，对非程序员极度友好！
 - 🎨 **多主题支持**：内置多套主题，一键导出。
 - 🧩 **超高扩展性**：主题统一接收数据字典，自由扩展如“荣誉奖项”、“技能清单”等自定义区块，无需修改底层核心接口。
 
@@ -83,13 +83,13 @@ python compile_previews.py --pdf --strict-fonts
 
 本项目内置精美主题，可通过修改 `resume.typ` 中的 import 语句快速切换。
 
-| Ats Friendly | Avatar Pro | Brilliant Cv |
-| :---: | :---: | :---: |
-| ![](themes/ats-friendly/ats-friendly.png) | ![](themes/avatar-pro/avatar-pro.png) | ![](themes/brilliant-cv/brilliant-cv.png) |
-| Classic | Finance Blue | Modern |
-| ![](themes/classic/classic.png) | ![](themes/finance-blue/finance-blue.png) | ![](themes/modern/modern.png) |
-| Prism | Resume Ng | Tech Pro |
-| ![](themes/prism/prism.png) | ![](themes/resume-ng/resume-ng.png) | ![](themes/tech-pro/tech-pro.png) |
+|               Ats Friendly                |                Avatar Pro                 |               Brilliant Cv                |
+| :---------------------------------------: | :---------------------------------------: | :---------------------------------------: |
+| ![](themes/ats-friendly/ats-friendly.png) |   ![](themes/avatar-pro/avatar-pro.png)   | ![](themes/brilliant-cv/brilliant-cv.png) |
+|                  Classic                  |               Finance Blue                |                  Modern                   |
+|      ![](themes/classic/classic.png)      | ![](themes/finance-blue/finance-blue.png) |       ![](themes/modern/modern.png)       |
+|                   Prism                   |                 Resume Ng                 |                 Tech Pro                  |
+|        ![](themes/prism/prism.png)        |    ![](themes/resume-ng/resume-ng.png)    |     ![](themes/tech-pro/tech-pro.png)     |
 
 ## 🎨 开发新主题
 
@@ -128,7 +128,7 @@ python compile_previews.py --pdf --strict-fonts
     ```
 
 4. **支持的模块**：
-    - `resume-info` - 个人信息
+    - `information` - 个人信息（主题渲染时对应 `module.id == "resume-info"`）
     - `education` - 教育经历
     - `experience` - 工作经历
     - `projects` - 项目经历
@@ -141,6 +141,31 @@ python compile_previews.py --pdf --strict-fonts
     ```bash
     typst compile themes/your-theme/example.typ --root .
     ```
+
+## 数据格式
+
+`data.yml` 推荐使用以下结构：
+
+```yaml
+information:
+    name: "你的名字"
+    avatar: "/img/avatar.jpg"
+    contacts: []
+
+content:
+    - type: education
+      title: "教育经历"
+      items: []
+    - type: experience
+      title: "工作经历"
+      items: []
+```
+
+说明：
+
+1. `content` 是数组，数组顺序就是渲染顺序。
+2. 支持复用类型（例如多个 `education` 或 `experience`）。
+3. 兼容旧格式（`resume-info` / `sections` / `module-config`），但新项目建议统一使用新结构。
 
 📖 **详细文档**：请查看 [themes/DEVELOP.md](themes/DEVELOP.md) 了解完整的开发规范、数据格式、最佳实践等。
 

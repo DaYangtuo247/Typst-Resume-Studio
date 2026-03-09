@@ -88,7 +88,7 @@
   let modules = standard-modules(data)
 
   // 提取个人信息用于头部渲染
-  let resume-info = data.at("resume-info", default: (:))
+  let resume-info = data.at("information", default: (:))
   let name = resume-info.at("name", default: "未命名")
   let contacts = resume-info.at("contacts", default: ())
 

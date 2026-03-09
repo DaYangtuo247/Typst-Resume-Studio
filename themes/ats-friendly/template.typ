@@ -173,6 +173,31 @@
   if v == none { fallback } else { v }
 }
 
+#let _resume-info(data) = {
+  data.at("information", default: (:))
+}
+
+#let _section-items(data, section-type) = {
+  let sections = data.at("content", default: data.at("sections", default: none))
+  if sections != none and type(sections) == array {
+    let items = ()
+    for section in sections {
+      if section.at("type", default: "") == section-type and section.at("enabled", default: true) {
+        let section-items = section.at("items", default: ())
+        if type(section-items) == array {
+          for item in section-items {
+            items.push(item)
+          }
+        }
+      }
+    }
+    return items
+  }
+
+  let raw = data.at(section-type, default: ())
+  if type(raw) == dictionary { raw.at("items", default: ()) } else { raw }
+}
+
 #let _find-contact(contacts, key) = {
   for c in contacts {
     if _safe(c.at("type", default: "")) == key {
@@ -261,15 +286,13 @@
 }
 
 #let _from-unified(data) = {
-  let resume-info = data.at("resume-info", default: (:))
+  let resume-info = _resume-info(data)
   let contacts = resume-info.at("contacts", default: ())
 
-  let raw-skills = data.at("skills", default: ())
-  let technical-skills = if type(raw-skills) == dictionary { raw-skills.at("items", default: ()) } else { raw-skills }
+  let technical-skills = _section-items(data, "skills")
 
   let experience = ()
-  let raw-exp = data.at("experience", default: ())
-  let exp-items = if type(raw-exp) == dictionary { raw-exp.at("items", default: ()) } else { raw-exp }
+  let exp-items = _section-items(data, "experience")
   for e in exp-items {
     let highlights = if "details" in e {
       e.at("details", default: ())
@@ -291,8 +314,7 @@
   }
 
   let projects = ()
-  let raw-proj = data.at("projects", default: ())
-  let proj-items = if type(raw-proj) == dictionary { raw-proj.at("items", default: ()) } else { raw-proj }
+  let proj-items = _section-items(data, "projects")
   for p in proj-items {
     let highlights = if "details" in p {
       p.at("details", default: ())
@@ -313,8 +335,7 @@
   }
 
   let internship = ()
-  let raw-intern = data.at("internship", default: ())
-  let intern-items = if type(raw-intern) == dictionary { raw-intern.at("items", default: ()) } else { raw-intern }
+  let intern-items = _section-items(data, "internship")
   for p in intern-items {
     let highlights = if "details" in p {
       p.at("details", default: ())
@@ -335,8 +356,7 @@
   }
 
   let education = ()
-  let raw-edu = data.at("education", default: ())
-  let edu-items = if type(raw-edu) == dictionary { raw-edu.at("items", default: ()) } else { raw-edu }
+  let edu-items = _section-items(data, "education")
   for edu in edu-items {
     education.push((
       institution: _safe(edu.at("institution", default: _safe(edu.at("school", default: ""))), fallback: ""),
@@ -397,7 +417,7 @@
   fonts-global: (),
   body,
 ) = {
-  let normalized = if "resume-info" in data {
+  let normalized = if "information" in data or "content" in data or "sections" in data {
     _from-unified(data)
   } else {
     _normalize-native(data)
@@ -489,9 +509,8 @@
   //  resume-info 扩展字段
   // ─────────────────────────────────────────────────────────
 
-  if "resume-info" in data {
-    let resume-info = data.at("resume-info", default: (:))
-
+  let resume-info = _resume-info(data)
+  if resume-info.len() > 0 {
     // 额外基本信息
     let extra-items = ()
     for (key, label) in (("gender", "Gender"), ("species", "Species"), ("birthday", "Birthday"), ("city", "City")) {
@@ -532,8 +551,7 @@
   //  荣誉奖项
   // ─────────────────────────────────────────────────────────
 
-  let raw-awards = data.at("awards", default: ())
-  let awards = if type(raw-awards) == dictionary { raw-awards.at("items", default: ()) } else { raw-awards }
+  let awards = _section-items(data, "awards")
   if awards.len() > 0 {
     [== Awards]
     for award in awards {
@@ -551,8 +569,7 @@
   //  资质证书
   // ─────────────────────────────────────────────────────────
 
-  let raw-certs = data.at("certificates", default: ())
-  let certificates = if type(raw-certs) == dictionary { raw-certs.at("items", default: ()) } else { raw-certs }
+  let certificates = _section-items(data, "certificates")
   if certificates.len() > 0 {
     [== Certificates]
     for cert in certificates {

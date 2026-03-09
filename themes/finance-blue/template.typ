@@ -100,7 +100,7 @@
   body,
 ) = {
   let modules = standard-modules(data)
-  let resume-info = data.at("resume-info", default: (:))
+  let resume-info = data.at("information", default: (:))
   let name = resume-info.at("name", default: "未命名")
   let contacts = resume-info.at("contacts", default: ())
 

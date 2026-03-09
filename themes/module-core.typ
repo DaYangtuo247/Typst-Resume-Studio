@@ -146,12 +146,12 @@
 }
 
 #let standard-modules(data) = {
-  let resume-info = data.at("resume-info", default: (:))
+  let resume-info = data.at("information", default: (:))
   let module-config = data.at("module-config", default: (:))
 
   // 内置模块的默认标题
   let default-titles = (
-    "resume-info": "个人信息",
+    "information": "个人信息",
     "education": "教育经历",
     "experience": "工作经历",
     "projects": "项目经历",
@@ -163,7 +163,7 @@
 
   // 内置模块的标准字段名（不会被当作自定义模块）
   let reserved-keys = (
-    "resume-info",
+    "information",
     "education",
     "experience",
     "projects",
@@ -174,6 +174,65 @@
     "module-config",
   )
 
+  // ==========================================
+  // 新格式支持：sections 数组
+  // ==========================================
+  // 如果数据中包含 sections 数组，使用新的数组格式
+  let sections-array = data.at("content", default: data.at("sections", default: none))
+  if sections-array != none and type(sections-array) == array {
+    let modules = ()
+
+    // 始终先添加 resume-info
+    let ri-title = resume-info.at("title", default: module-config.at(
+      "information",
+      default: default-titles.at("information"),
+    ))
+    modules.push((
+      id: "resume-info",
+      title: ri-title,
+      payload: resume-info,
+    ))
+
+    // 遍历 sections 数组，按顺序处理每个 section
+    for section in sections-array {
+      let section-type = section.at("type", default: "")
+      let section-title = section.at("title", default: "")
+      let section-items = section.at("items", default: ())
+      let enabled = section.at("enabled", default: true)
+
+      // 如果 section 被禁用，跳过
+      if not enabled {
+        continue
+      }
+
+      // 如果没有内容，跳过
+      if not _has-content(section-items) {
+        continue
+      }
+
+      // 根据类型处理 items
+      let payload = section-items
+      if section-type == "skills" {
+        // skills 需要特殊处理（标准化）
+        payload = normalize-skills(section-items)
+      }
+
+      // 添加到 modules 列表
+      if _has-content(payload) {
+        modules.push((
+          id: section-type,
+          title: section-title,
+          payload: payload,
+        ))
+      }
+    }
+
+    return modules
+  }
+
+  // ==========================================
+  // 旧格式支持（向后兼容）
+  // ==========================================
   // 获取自定义的模块顺序或自动扫描 YAML 中的顺序
   let module-order = module-config.at("module-order", default: none)
 
@@ -191,11 +250,11 @@
 
   // 按照模块顺序处理每个模块
   for module-id in module-order {
-    if module-id == "resume-info" {
+    if module-id == "information" {
       // resume-info 始终作为头部元数据
       let ri-title = resume-info.at("title", default: module-config.at(
-        "resume-info",
-        default: default-titles.at("resume-info"),
+        "information",
+        default: default-titles.at("information"),
       ))
       modules.push((
         id: "resume-info",

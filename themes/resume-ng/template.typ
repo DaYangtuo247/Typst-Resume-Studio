@@ -1,5 +1,45 @@
 #import "../module-core.typ": extract-items, extract-title, render-contact
 
+#let _resume-info(data) = {
+  data.at("information", default: (:))
+}
+
+#let _sections-array(data) = {
+  data.at("content", default: data.at("sections", default: none))
+}
+
+#let _section-by-type(data, section-type) = {
+  let sections = _sections-array(data)
+  if sections != none and type(sections) == array {
+    let items = ()
+    let title = ""
+    for section in sections {
+      if section.at("type", default: "") == section-type and section.at("enabled", default: true) {
+        if title == "" {
+          title = section.at("title", default: "")
+        }
+        let section-items = section.at("items", default: ())
+        if type(section-items) == array {
+          for item in section-items {
+            items.push(item)
+          }
+        }
+      }
+    }
+    return (title: title, items: items)
+  }
+
+  let raw = data.at(section-type, default: none)
+  if raw == none {
+    return (title: "", items: ())
+  }
+
+  (
+    title: extract-title(raw, fallback: ""),
+    items: extract-items(raw),
+  )
+}
+
 #let delimiter = " | "
 
 #let array-to-str(a, delimiter: delimiter) = {
@@ -98,7 +138,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 #let blueprint(data: (:), fonts-global: (), body) = {
-  let info = data.at("resume-info", default: (:))
+  let info = _resume-info(data)
   let fonts-theme = ("Times New Roman", "Heiti SC", "PingFang SC", "STHeiti")
   let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
 
@@ -125,58 +165,52 @@
   )
 
   // Education
-  if "education" in data {
-    let raw-edu = data.at("education", default: ())
-    let edu-items = extract-items(raw-edu)
-    let edu-title = extract-title(raw-edu, fallback: "教育经历")
-    if edu-items.len() > 0 {
-      resume-section(edu-title)
-      for edu in edu-items {
-        resume-education(
-          university: edu.at("university", default: edu.at("school", default: "")),
-          degree: edu.at("degree", default: ""),
-          school: edu.at("school", default: edu.at("major", default: "")),
-          start: edu.at("start", default: ""),
-          end: edu.at("end", default: ""),
-        )[
-          #let details = edu.at("details", default: edu.at("description", default: ""))
-          #if type(details) == str {
-            eval(details, mode: "markup")
-          } else if type(details) == array {
-            for item in details {
-              [- #eval(item, mode: "markup")]
-            }
+  let edu-section = _section-by-type(data, "education")
+  if edu-section.items.len() > 0 {
+    let edu-title = if edu-section.title != "" { edu-section.title } else { "教育经历" }
+    resume-section(edu-title)
+    for edu in edu-section.items {
+      resume-education(
+        university: edu.at("university", default: edu.at("school", default: "")),
+        degree: edu.at("degree", default: ""),
+        school: edu.at("school", default: edu.at("major", default: "")),
+        start: edu.at("start", default: ""),
+        end: edu.at("end", default: ""),
+      )[
+        #let details = edu.at("details", default: edu.at("description", default: ""))
+        #if type(details) == str {
+          eval(details, mode: "markup")
+        } else if type(details) == array {
+          for item in details {
+            [- #eval(item, mode: "markup")]
           }
-        ]
-      }
+        }
+      ]
     }
   }
 
   // Skills
-  if "skills" in data {
-    let raw-skills = data.at("skills", default: ())
-    let skill-items = extract-items(raw-skills)
-    let skill-title = extract-title(raw-skills, fallback: "技术能力")
-    if skill-items.len() > 0 {
-      resume-section(skill-title)
-      for s in skill-items {
-        if type(s) == str {
-          [- #eval(s, mode: "markup")]
-        } else if type(s) == dictionary {
-          // 支持 name/level/description 格式
-          let name = s.at("name", default: "")
-          if name != "" {
-            let level = s.at("level", default: "")
-            let description = s.at("description", default: "")
-            let parts = (name,)
-            if level != "" { parts.push(level) }
-            if description != "" { parts.push(description) }
-            [- #parts.join("：")]
-          } else if "title" in s {
-            [*#s.title:* ]
-            if "items" in s {
-              eval(s.items, mode: "markup")
-            }
+  let skill-section = _section-by-type(data, "skills")
+  if skill-section.items.len() > 0 {
+    let skill-title = if skill-section.title != "" { skill-section.title } else { "技术能力" }
+    resume-section(skill-title)
+    for s in skill-section.items {
+      if type(s) == str {
+        [- #eval(s, mode: "markup")]
+      } else if type(s) == dictionary {
+        // 支持 name/level/description 格式
+        let name = s.at("name", default: "")
+        if name != "" {
+          let level = s.at("level", default: "")
+          let description = s.at("description", default: "")
+          let parts = (name,)
+          if level != "" { parts.push(level) }
+          if description != "" { parts.push(description) }
+          [- #parts.join("：")]
+        } else if "title" in s {
+          [*#s.title:* ]
+          if "items" in s {
+            eval(s.items, mode: "markup")
           }
         }
       }
@@ -184,25 +218,55 @@
   }
 
   // Experience
-  if "experience" in data {
-    let raw-exp = data.at("experience", default: ())
-    let exp-items = extract-items(raw-exp)
-    let exp-title = extract-title(raw-exp, fallback: "工作经历")
-    if exp-items.len() > 0 {
-      resume-section(exp-title)
-      for exp in exp-items {
-        resume-work(
-          company: exp.at("company", default: ""),
-          duty: exp.at("duty", default: exp.at("position", default: "")),
-          start: exp.at("start", default: ""),
-          end: exp.at("end", default: ""),
+  let exp-section = _section-by-type(data, "experience")
+  if exp-section.items.len() > 0 {
+    let exp-title = if exp-section.title != "" { exp-section.title } else { "工作经历" }
+    resume-section(exp-title)
+    for exp in exp-section.items {
+      resume-work(
+        company: exp.at("company", default: ""),
+        duty: exp.at("duty", default: exp.at("position", default: "")),
+        start: exp.at("start", default: ""),
+        end: exp.at("end", default: ""),
+      )[
+        #let details = exp.at("details", default: exp.at("description", default: ""))
+        #if type(details) == str {
+          eval(details, mode: "markup")
+        } else if type(details) == array {
+          for item in details {
+            [- #eval(item, mode: "markup")]
+          }
+        }
+      ]
+    }
+  }
+
+  // Projects & Internship
+  for section-key in ("projects", "internship") {
+    let section-data = _section-by-type(data, section-key)
+    let items = section-data.items
+    let section-title = if section-data.title != "" {
+      section-data.title
+    } else if section-key == "projects" {
+      "项目经历"
+    } else {
+      "实习经历"
+    }
+    if items.len() > 0 {
+      resume-section(section-title)
+      for item in items {
+        resume-project(
+          title: item.at("title", default: item.at("name", default: "")),
+          duty: item.at("duty", default: item.at("role", default: "")),
+          start: item.at("start", default: ""),
+          end: item.at("end", default: ""),
         )[
-          #let details = exp.at("details", default: exp.at("description", default: ""))
+          #let details = item.at("details", default: item.at("description", default: ""))
           #if type(details) == str {
             eval(details, mode: "markup")
           } else if type(details) == array {
-            for item in details {
-              [- #eval(item, mode: "markup")]
+            for detail in details {
+              [- #eval(detail, mode: "markup")]
             }
           }
         ]
@@ -210,78 +274,41 @@
     }
   }
 
-  // Projects & Internship
-  for section-key in ("projects", "internship") {
-    if section-key in data {
-      let raw-data = data.at(section-key, default: ())
-      let items = extract-items(raw-data)
-      let section-title = extract-title(raw-data, fallback: if section-key == "projects" { "项目经历" } else {
-        "实习经历"
-      })
-      if items.len() > 0 {
-        resume-section(section-title)
-        for item in items {
-          resume-project(
-            title: item.at("title", default: item.at("name", default: "")),
-            duty: item.at("duty", default: item.at("role", default: "")),
-            start: item.at("start", default: ""),
-            end: item.at("end", default: ""),
-          )[
-            #let details = item.at("details", default: item.at("description", default: ""))
-            #if type(details) == str {
-              eval(details, mode: "markup")
-            } else if type(details) == array {
-              for detail in details {
-                [- #eval(detail, mode: "markup")]
-              }
-            }
-          ]
-        }
-      }
-    }
-  }
-
   // Awards
-  if "awards" in data {
-    let raw-awards = data.at("awards", default: ())
-    let award-items = extract-items(raw-awards)
-    let award-title = extract-title(raw-awards, fallback: "荣誉奖项")
-    if award-items.len() > 0 {
-      resume-section(award-title)
-      for award in award-items {
-        if type(award) == str {
-          [- #eval(award, mode: "markup")]
-        } else if type(award) == dictionary {
-          [
-            - *#award.at("title", default: "")* #if award.at("date", default: "") != "" { [(#award.at("date", default: ""))] }
-          ]
-        }
+  let award-section = _section-by-type(data, "awards")
+  if award-section.items.len() > 0 {
+    let award-title = if award-section.title != "" { award-section.title } else { "荣誉奖项" }
+    resume-section(award-title)
+    for award in award-section.items {
+      if type(award) == str {
+        [- #eval(award, mode: "markup")]
+      } else if type(award) == dictionary {
+        [
+          - *#award.at("title", default: "")* #if award.at("date", default: "") != "" { [(#award.at("date", default: ""))] }
+        ]
       }
     }
   }
 
   // Certificates
-  if "certificates" in data {
-    let raw-certs = data.at("certificates", default: ())
-    let cert-items = extract-items(raw-certs)
-    let cert-title = extract-title(raw-certs, fallback: "资质证书")
-    if cert-items.len() > 0 {
-      resume-section(cert-title)
-      for cert in cert-items {
-        if type(cert) == dictionary {
-          [
-            - *#cert.at("name", default: "")* #if cert.at("date", default: "") != "" { [(#cert.at("date", default: ""))] } #if cert.at("org", default: "") != "" { [ — #cert.at("org", default: "")] }
-          ]
-        } else {
-          [- #str(cert)]
-        }
+  let cert-section = _section-by-type(data, "certificates")
+  if cert-section.items.len() > 0 {
+    let cert-title = if cert-section.title != "" { cert-section.title } else { "资质证书" }
+    resume-section(cert-title)
+    for cert in cert-section.items {
+      if type(cert) == dictionary {
+        [
+          - *#cert.at("name", default: "")* #if cert.at("date", default: "") != "" { [(#cert.at("date", default: ""))] } #if cert.at("org", default: "") != "" { [ — #cert.at("org", default: "")] }
+        ]
+      } else {
+        [- #str(cert)]
       }
     }
   }
 
   // resume-info 扩展字段
-  if "resume-info" in data {
-    let resume-info = data.at("resume-info", default: (:))
+  if info.len() > 0 {
+    let resume-info = info
 
     let extra-items = ()
     for (key, label) in (("gender", "性别"), ("species", "种类"), ("birthday", "生日"), ("city", "城市")) {
