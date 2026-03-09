@@ -8,14 +8,12 @@ AGENTS.md
 
 # 编辑器
 .vscode/
+.github/
+.gemini/
 .idea/
 
 # 个人信息（只忽略 YAML 数据，保留模板）
 myself/*.yml
 !myself/example.yml
-
-# 私有配置（在分支中管理）
-.github/
-.gemini/
 
 fonts/*
