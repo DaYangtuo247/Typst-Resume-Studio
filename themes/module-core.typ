@@ -1,6 +1,16 @@
 // Shared module contract for theme authors.
 // A theme can render sections by iterating over `standard-modules(data)`.
 
+// 获取 URL 的显示标签（例如 GitHub, LinkedIn 等）
+#let get-url-label(url, custom-label: "") = {
+  if custom-label != "" { return custom-label + ": " }
+  let label = "链接: "
+  if url.contains("github.com") { label = "GitHub: " }
+  else if url.contains("linkedin.com") { label = "LinkedIn: " }
+  else if url.contains("zhihu.com") { label = "知乎: " }
+  label
+}
+
 // 将 YAML 字符串作为 Typst 标记语言解析（支持 *加粗* _斜体_ 等内联语法）
 #let markup(text) = eval("[" + text + "]")
 
@@ -22,11 +32,20 @@
   let title = item.at("title", default: item.at("name", default: ""))
   let desc = item.at("description", default: item.at("org", default: ""))
   let date = item.at("date", default: "")
-  if title != "" {
-    [*#markup(str(title))* #if date != "" { [ (#markup(str(date)))] } #if desc != "" { [ — #markup(str(desc))] }]
+  let url = item.at("url", default: "")
+
+  let title-content = if title != "" {
+    markup(str(title))
+  } else {
+    ""
+  }
+
+  if title-content != "" {
+    [*#title-content* #if date != "" { [ (#markup(str(date)))] } #if desc != "" { [ — #markup(str(desc))] }]
   } else {
     let parts = ()
     for (k, v) in item {
+      if k == "url" { continue }
       parts.push(k + ": " + str(v))
     }
     [#parts.join(", ")]

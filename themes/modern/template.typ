@@ -2,7 +2,7 @@
 //  导入模块化协议
 // ─────────────────────────────────────────────────────────
 
-#import "../module-core.typ": markup, render-contacts, render-dict-item, resume-info-extras, standard-modules
+#import "../module-core.typ": get-url-label, markup, render-contacts, render-dict-item, resume-info-extras, standard-modules
 
 // ─────────────────────────────────────────────────────────
 //  图标定义（Font-based Unicode icons）
@@ -53,10 +53,11 @@
 }
 
 // 简历条目（包含标题、职位、详情、时间）
-#let resume-item(title: "", position: "", detail: "", time: "") = {
+#let resume-item(title: "", position: "", detail: "", time: "", url: "", url-label: "") = {
+  let title-content = markup(title)
   grid(
     columns: (1fr, auto),
-    [*#markup(title)*], [#markup(time)],
+    [*#title-content*], [#markup(time)],
   )
   if position != "" {
     grid(
@@ -139,15 +140,23 @@
       // 教育经历
       resume-section(module.title)
       for edu in module.payload {
+        let url = edu.at("url", default: "")
         resume-item(
           title: edu.school,
           position: edu.degree,
           detail: edu.major,
           time: edu.start + " ~ " + edu.end,
+          url: url,
+          url-label: edu.at("url-label", default: ""),
         )
         let details = edu.at("details", default: ())
-        if details.len() > 0 {
-          list(..details.map(d => markup(d)))
+        let all-items = details.map(d => markup(d))
+        if url != "" {
+          let label = get-url-label(url, custom-label: edu.at("url-label", default: ""))
+          all-items.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        if all-items.len() > 0 {
+          list(..all-items)
         }
         v(0.2em)
       }
@@ -155,14 +164,45 @@
       // 工作经历
       resume-section(module.title)
       for exp in module.payload {
+        let url = exp.at("url", default: "")
         resume-item(
           title: exp.company,
           position: exp.position,
           time: exp.start + " ~ " + exp.end,
+          url: url,
+          url-label: exp.at("url-label", default: ""),
         )
         let details = exp.at("details", default: ())
-        if details.len() > 0 {
-          list(..details.map(d => markup(d)))
+        let all-items = details.map(d => markup(d))
+        if url != "" {
+          let label = get-url-label(url, custom-label: exp.at("url-label", default: ""))
+          all-items.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        if all-items.len() > 0 {
+          list(..all-items)
+        }
+        v(0.2em)
+      }
+    } else if module.id == "internship" {
+      // 实习经历
+      resume-section(module.title)
+      for intern in module.payload {
+        let url = intern.at("url", default: "")
+        resume-item(
+          title: intern.at("company", default: intern.at("name", default: "")),
+          position: intern.at("position", default: intern.at("role", default: "")),
+          time: intern.start + " ~ " + intern.end,
+          url: url,
+          url-label: intern.at("url-label", default: ""),
+        )
+        let details = intern.at("details", default: ())
+        let all-items = details.map(d => markup(d))
+        if url != "" {
+          let label = get-url-label(url, custom-label: intern.at("url-label", default: ""))
+          all-items.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        if all-items.len() > 0 {
+          list(..all-items)
         }
         v(0.2em)
       }
@@ -170,14 +210,22 @@
       // 项目经历
       resume-section(module.title)
       for proj in module.payload {
+        let url = proj.at("url", default: "")
         resume-item(
           title: proj.name,
           position: proj.role,
           time: proj.start + " ~ " + proj.end,
+          url: url,
+          url-label: proj.at("url-label", default: ""),
         )
         let details = proj.at("details", default: ())
-        if details.len() > 0 {
-          list(..details.map(d => markup(d)))
+        let all-items = details.map(d => markup(d))
+        if url != "" {
+          let label = get-url-label(url, custom-label: proj.at("url-label", default: ""))
+          all-items.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        if all-items.len() > 0 {
+          list(..all-items)
         }
         v(0.2em)
       }

@@ -1,5 +1,5 @@
 #import "../module-core.typ": (
-  contact-value, markup, render-contacts, render-dict-item, resume-info-extras, standard-modules,
+  contact-value, get-url-label, markup, render-contacts, render-dict-item, resume-info-extras, standard-modules,
 )
 
 // ─────────────────────────────────────────────────────────
@@ -39,20 +39,21 @@
   v(0.5em)
 }
 
-#let resume-item-3col(left-text: "", center-text: "", right-text: "", body) = {
+#let resume-item-3col(left-text: "", center-text: "", right-text: "", url: "", url-label: "", body) = {
+  let _markup(v) = if type(v) == str { markup(v) } else { v }
   grid(
     columns: (1.2fr, 2fr, 1.2fr),
     align: (left, center, right),
-    text(weight: "bold", markup(left-text)),
-    text(weight: "bold", markup(center-text)),
-    text(weight: "bold", markup(right-text)),
+    text(weight: "bold", _markup(left-text)),
+    text(weight: "bold", _markup(center-text)),
+    text(weight: "bold", _markup(right-text)),
   )
   v(0.3em)
   body
   v(0.6em)
 }
 
-#let resume-education(university: "", degree: "", school: "", start: "", end: "", body) = {
+#let resume-education(university: "", degree: "", school: "", start: "", end: "", url: "", url-label: "", body) = {
   let date = resume-date(start, end: end)
   let right-col = ()
   if school != "" {
@@ -62,32 +63,44 @@
     right-col.push(degree)
   }
 
+  let uni-content = markup(university)
+
   resume-item-3col(
     left-text: date,
-    center-text: university,
+    center-text: uni-content,
     right-text: right-col.join(" "),
+    url: url,
+    url-label: url-label,
     body,
   )
 }
 
-#let resume-work(company: "", duty: "", start: "", end: "", body) = {
+#let resume-work(company: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
   let date = resume-date(start, end: end)
+
+  let company-content = markup(company)
 
   resume-item-3col(
     left-text: date,
-    center-text: company,
+    center-text: company-content,
     right-text: duty,
+    url: url,
+    url-label: url-label,
     body,
   )
 }
 
-#let resume-project(title: "", duty: "", start: "", end: "", body) = {
+#let resume-project(title: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
   let date = resume-date(start, end: end)
+
+  let title-content = markup(title)
 
   resume-item-3col(
     left-text: date,
-    center-text: title,
+    center-text: title-content,
     right-text: duty,
+    url: url,
+    url-label: url-label,
     body,
   )
 }
@@ -141,46 +154,93 @@
     if module.id == "education" {
       resume-section(module.title)
       for edu in module.payload {
+        let url = edu.at("url", default: "")
+        let url-label = edu.at("url-label", default: "")
         resume-education(
           university: edu.school,
           degree: edu.degree,
           school: edu.major,
           start: edu.start,
           end: edu.end,
+          url: url,
+          url-label: url-label,
         )[
           #let details = edu.at("details", default: ())
+          #if url != "" {
+            let label = get-url-label(url, custom-label: url-label)
+            details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+          }
           #if details.len() > 0 {
-            list(..details.map(d => markup(d)))
+            list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         ]
       }
     } else if module.id == "experience" {
       resume-section(module.title)
       for exp in module.payload {
+        let url = exp.at("url", default: "")
+        let url-label = exp.at("url-label", default: "")
         resume-work(
           company: exp.company,
           duty: exp.position,
           start: exp.start,
           end: exp.end,
+          url: url,
+          url-label: url-label,
         )[
           #let details = exp.at("details", default: ())
+          #if url != "" {
+            let label = get-url-label(url, custom-label: url-label)
+            details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+          }
           #if details.len() > 0 {
-            list(..details.map(d => markup(d)))
+            list(..details.map(d => if type(d) == content { d } else { markup(d) }))
+          }
+        ]
+      }
+    } else if module.id == "internship" {
+      resume-section(module.title)
+      for intern in module.payload {
+        let url = intern.at("url", default: "")
+        let url-label = intern.at("url-label", default: "")
+        resume-work(
+          company: intern.at("company", default: intern.at("name", default: "")),
+          duty: intern.at("position", default: intern.at("role", default: "")),
+          start: intern.start,
+          end: intern.end,
+          url: url,
+          url-label: url-label,
+        )[
+          #let details = intern.at("details", default: ())
+          #if url != "" {
+            let label = get-url-label(url, custom-label: url-label)
+            details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+          }
+          #if details.len() > 0 {
+            list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         ]
       }
     } else if module.id == "projects" {
       resume-section(module.title)
       for proj in module.payload {
+        let url = proj.at("url", default: "")
+        let url-label = proj.at("url-label", default: "")
         resume-project(
           title: proj.name,
           duty: proj.role,
           start: proj.start,
           end: proj.end,
+          url: url,
+          url-label: url-label,
         )[
           #let details = proj.at("details", default: ())
+          #if url != "" {
+            let label = get-url-label(url, custom-label: url-label)
+            details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+          }
           #if details.len() > 0 {
-            list(..details.map(d => markup(d)))
+            list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         ]
       }

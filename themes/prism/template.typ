@@ -1,4 +1,4 @@
-#import "../module-core.typ": markup, render-contact, render-dict-item, resume-info-extras, standard-modules
+#import "../module-core.typ": get-url-label, markup, render-contact, render-dict-item, resume-info-extras, standard-modules
 
 // ==========================================
 // 提取原 PDF 核心配色
@@ -206,9 +206,19 @@
     section-block(module.title, axis-x, section-notch-right-x, title-overlap, {
       if module.id == "education" {
         for edu in module.payload {
-          exp-header(markup(edu.school), markup(edu.degree + " " + edu.major), markup(edu.start + " - " + edu.end))
+          let school = edu.school
+          let edu-url = edu.at("url", default: "")
+          let school-content = markup(school)
+          exp-header(school-content, markup(edu.degree + " " + edu.major), markup(edu.start + " - " + edu.end))
+          
           let details = edu.at("details", default: ())
-          for d in details { list(markup(d)) }
+          if edu-url != "" {
+            let label = get-url-label(edu-url, custom-label: edu.at("url-label", default: ""))
+            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(edu-url)]))
+          }
+          for d in details { 
+            if type(d) == content { list(d) } else { list(markup(d)) }
+          }
           v(0.5em)
         }
       } else if module.id == "experience" or module.id == "internship" {
@@ -216,10 +226,19 @@
           // 兼容两种字段命名：company/name, position/role
           let company = exp.at("company", default: exp.at("name", default: ""))
           let position = exp.at("position", default: exp.at("role", default: ""))
-          exp-header(markup(company), markup(position), markup(exp.start + " - " + exp.end))
+          let exp-url = exp.at("url", default: "")
+          let company-content = markup(company)
+          exp-header(company-content, markup(position), markup(exp.start + " - " + exp.end))
+          
           let details = exp.at("details", default: ())
+          if exp-url != "" {
+            let label = get-url-label(exp-url, custom-label: exp.at("url-label", default: ""))
+            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(exp-url)]))
+          }
           for d in details {
-            if d.starts-with("-") or d.ends-with("：") {
+            if type(d) == content {
+              list(d)
+            } else if d.starts-with("-") or d.ends-with("：") {
               markup(d)
               v(-0.5em)
             } else {
@@ -230,16 +249,18 @@
         }
       } else if module.id == "projects" {
         for proj in module.payload {
-          let proj-name = proj.name
-          let github = proj.at("github", default: "")
-          if github != "" {
-            proj-name = link(github, markup(proj-name))
-          } else {
-            proj-name = markup(proj-name)
-          }
+          let proj-name = markup(proj.name)
+          let project-url = proj.at("url", default: "")
           exp-header(proj-name, markup(proj.role), markup(proj.start + " - " + proj.end))
+          
           let details = proj.at("details", default: ())
-          for d in details { list(markup(d)) }
+          if project-url != "" {
+            let label = get-url-label(project-url, custom-label: proj.at("url-label", default: ""))
+            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(project-url)]))
+          }
+          for d in details {
+            if type(d) == content { list(d) } else { list(markup(d)) }
+          }
           v(0.5em)
         }
       } else if module.id == "skills" {

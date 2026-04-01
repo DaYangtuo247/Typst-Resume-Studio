@@ -1,4 +1,4 @@
-#import "../module-core.typ": markup, render-contacts
+#import "../module-core.typ": get-url-label, markup, render-contacts
 
 #let resume(
   // Name of the author (you)
@@ -112,17 +112,20 @@
   dates: "",
   tech-used: "",
   location: "",
+  url: "",
+  url-label: "",
 ) = {
+  let company-content = strong(company)
   if tech-used == "" {
     two-by-two-layout(
-      top-left: strong(company),
+      top-left: company-content,
       top-right: dates,
       bottom-left: role,
       bottom-right: emph(location),
     )
   } else {
     two-by-two-layout(
-      top-left: strong(company) + " " + "|" + " " + strong(role),
+      top-left: company-content + " " + "|" + " " + strong(role),
       top-right: dates,
       bottom-left: tech-used,
       bottom-right: emph(location),
@@ -136,18 +139,20 @@
   dates: "",
   tech-used: "",
   url: "",
+  url-label: "",
 ) = {
+  let name-content = strong(name)
   if tech-used == "" {
     one-by-one-layout(
-      left: [*#name* #if url != "" and dates != "" [(#link("https://" + url)[#url])]],
+      left: name-content,
       right: dates,
     )
   } else {
     two-by-two-layout(
-      top-left: strong(name),
+      top-left: name-content,
       top-right: dates,
       bottom-left: tech-used,
-      bottom-right: [(#link("https://" + url)[#url])],
+      bottom-right: [],
     )
   }
 }
@@ -158,9 +163,12 @@
   location: "",
   degree: "",
   dates: "",
+  url: "",
+  url-label: "",
 ) = {
+  let inst-content = strong(institution)
   two-by-two-layout(
-    top-left: strong(institution),
+    top-left: inst-content,
     top-right: location,
     bottom-left: degree,
     bottom-right: dates,
@@ -309,6 +317,8 @@
       end-date: _safe(e.at("end", default: "")),
       location: _safe(e.at("location", default: _safe(resume-info.at("location", default: ""))), fallback: ""),
       tech-used: _safe(e.at("tech-used", default: "")),
+      url: _safe(e.at("url", default: "")),
+      url-label: _safe(e.at("url-label", default: "")),
       highlights: highlights,
     ))
   }
@@ -330,6 +340,7 @@
       end-date: _safe(p.at("end", default: "")),
       tech-used: _safe(p.at("tech-used", default: _safe(p.at("role", default: ""))), fallback: ""),
       url: _safe(p.at("url", default: _safe(p.at("link", default: ""))), fallback: ""),
+      url-label: _safe(p.at("url-label", default: "")),
       highlights: highlights,
     ))
   }
@@ -350,7 +361,8 @@
       start-date: _safe(p.at("start", default: "")),
       end-date: _safe(p.at("end", default: "")),
       tech-used: _safe(p.at("tech-used", default: _safe(p.at("role", default: ""))), fallback: ""),
-      url: _safe(p.at("url", default: _safe(p.at("github", default: ""))), fallback: ""),
+      url: _safe(p.at("url", default: _safe(p.at("link", default: ""))), fallback: ""),
+      url-label: _safe(p.at("url-label", default: "")),
       highlights: highlights,
     ))
   }
@@ -369,6 +381,8 @@
         },
       start-date: _safe(edu.at("start", default: _safe(edu.at("start-date", default: ""))), fallback: ""),
       end-date: _safe(edu.at("end", default: _safe(edu.at("end-date", default: ""))), fallback: ""),
+      url: _safe(edu.at("url", default: "")),
+      url-label: _safe(edu.at("url-label", default: "")),
     ))
   }
 
@@ -407,7 +421,8 @@
         }
       }
     } else if _safe(item) != "" {
-      [- #markup(str(item))]
+      let content-item = if type(item) == str { markup(str(item)) } else { item }
+      [- #content-item]
     }
   }
 }
@@ -474,14 +489,23 @@
   if experience.len() > 0 {
     [== Experience]
     for e in experience {
+      let url = _safe(e.at("url", default: ""))
+      let url-label = _safe(e.at("url-label", default: ""))
+      let highlights = e.at("highlights", default: ())
       work(
         company: _safe(e.at("company", default: "")),
         role: _safe(e.at("role", default: "")),
         dates: _date(e.at("start-date", default: ""), e.at("end-date", default: "")),
         tech-used: _safe(e.at("tech-used", default: "")),
         location: _safe(e.at("location", default: "")),
+        url: url,
+        url-label: url-label,
       )
-      _render-bullets(e.at("highlights", default: ()))
+      if url != "" {
+        let label = get-url-label(url, custom-label: url-label)
+        highlights.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
+      }
+      _render-bullets(highlights)
     }
   }
 
@@ -490,13 +514,21 @@
     if section-data.len() > 0 {
       [== #section-title]
       for p in section-data {
+        let url = _safe(p.at("url", default: ""))
+        let url-label = _safe(p.at("url-label", default: ""))
+        let highlights = p.at("highlights", default: ())
         project(
           name: _safe(p.at("name", default: "")),
           dates: _date(p.at("start-date", default: ""), p.at("end-date", default: "")),
           tech-used: _safe(p.at("tech-used", default: "")),
-          url: _safe(p.at("url", default: "")),
+          url: url,
+          url-label: url-label,
         )
-        _render-bullets(p.at("highlights", default: ()))
+        if url != "" {
+          let label = get-url-label(url, custom-label: url-label)
+          highlights.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
+        }
+        _render-bullets(highlights)
       }
     }
   }
@@ -504,12 +536,20 @@
   if education.len() > 0 {
     [== Education]
     for ed in education {
+      let url = _safe(ed.at("url", default: ""))
+      let url-label = _safe(ed.at("url-label", default: ""))
       edu(
         institution: _safe(ed.at("institution", default: "")),
         location: _safe(ed.at("location", default: "")),
         degree: _safe(ed.at("degree", default: "")),
         dates: _date(ed.at("start-date", default: ""), ed.at("end-date", default: "")),
+        url: url,
+        url-label: url-label,
       )
+      if url != "" {
+        let label = get-url-label(url, custom-label: url-label)
+        _render-bullets((text(size: 8pt, fill: gray, [#label #link(url)]),))
+      }
     }
   }
 

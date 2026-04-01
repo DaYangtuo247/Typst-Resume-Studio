@@ -295,6 +295,18 @@ content:
             details:
                 - "..."
 
+    - type: internship
+      title: "实习经历"
+      items:
+          - name: "项目或实习名称"
+            role: "职责"
+            start: "2024.01"
+            end: "2024.03"
+            url: "https://example.com/project"
+            details:
+                - "技术栈：Go / PostgreSQL / Redis"
+                - "..."
+
     - type: skills
       title: "技能"
       items:
@@ -307,6 +319,12 @@ content:
 ```
 
 > 兼容说明：`module-core.typ` 仍兼容旧格式（`resume-info` / `sections` / `module-config`），但新主题与新数据建议统一采用 `information` / `content`。
+
+补充约定：
+
+- 项目、实习等带外链的条目统一使用 `url` 字段。
+- 如果链接恰好是 GitHub，写成普通 `url` 即可；是否显示为 GitHub 由主题样式自行决定。
+- 技术栈描述优先写入 `details` 中的一行文本，例如 `技术栈：Go / Redis / PostgreSQL`，不单独约定 `tags` 字段。
 
 ### module-core.typ 辅助函数
 

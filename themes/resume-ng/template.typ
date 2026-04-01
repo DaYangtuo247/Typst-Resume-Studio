@@ -1,4 +1,4 @@
-#import "../module-core.typ": extract-items, extract-title, markup, render-contact
+#import "../module-core.typ": extract-items, extract-title, get-url-label, markup, render-contact
 
 #let _resume-info(data) = {
   data.at("information", default: (:))
@@ -88,7 +88,7 @@
   }
 }
 
-#let resume-item(left: "", right: "", body) = {
+#let resume-item(left: "", right: "", url: "", url-label: "", body) = {
   let right-text = if type(right) == str { markup(right) } else { right }
   let left-text = if type(left) == str { markup(left) } else { left }
 
@@ -97,36 +97,44 @@
   linebreak()
   body
 }
-
-#let resume-education(university: "", degree: "", school: "", start: "", end: "", body) = {
-  let left = (strong(university), school, degree)
+#let resume-education(university: "", degree: "", school: "", start: "", end: "", url: "", url-label: "", body) = {
+  let uni-content = strong(university)
+  let left = (uni-content, school, degree)
   let right = resume-date(start, end: end)
 
   resume-item(
     left: array-to-str(left),
     right: right,
+    url: url,
+    url-label: url-label,
     body,
   )
 }
 
-#let resume-work(company: "", duty: "", start: "", end: "", body) = {
-  let left = (strong(company), duty)
+#let resume-work(company: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
+  let company-content = strong(company)
+  let left = (company-content, duty)
   let right = resume-date(start, end: end)
 
   resume-item(
     left: array-to-str(left),
     right: right,
+    url: url,
+    url-label: url-label,
     body,
   )
 }
 
-#let resume-project(title: "", duty: "", start: "", end: "", body) = {
-  let left = (strong(title), duty)
+#let resume-project(title: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
+  let title-content = strong(title)
+  let left = (title-content, duty)
   let right = resume-date(start, end: end)
 
   resume-item(
     left: array-to-str(left),
     right: right,
+    url: url,
+    url-label: url-label,
     body,
   )
 }
@@ -173,18 +181,27 @@
     let edu-title = if edu-section.title != "" { edu-section.title } else { "教育经历" }
     resume-section(edu-title)
     for edu in edu-section.items {
+      let url = edu.at("url", default: "")
+      let url-label = edu.at("url-label", default: "")
       resume-education(
         university: edu.at("university", default: edu.at("school", default: "")),
         degree: edu.at("degree", default: ""),
         school: edu.at("school", default: edu.at("major", default: "")),
         start: edu.at("start", default: ""),
         end: edu.at("end", default: ""),
+        url: url,
+        url-label: url-label,
       )[
-        #let details = edu.at("details", default: edu.at("description", default: ""))
-        #if type(details) == str {
-          eval(details, mode: "markup")
-        } else if type(details) == array {
-          for item in details {
+        #let details = edu.at("details", default: edu.at("description", default: ()))
+        #if type(details) == str { details = (details,) }
+        #if url != "" {
+          let label = get-url-label(url, custom-label: url-label)
+          details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        #for item in details {
+          if type(item) == content {
+            [- #item]
+          } else {
             [- #eval(item, mode: "markup")]
           }
         }
@@ -232,17 +249,26 @@
     let exp-title = if exp-section.title != "" { exp-section.title } else { "工作经历" }
     resume-section(exp-title)
     for exp in exp-section.items {
+      let url = exp.at("url", default: "")
+      let url-label = exp.at("url-label", default: "")
       resume-work(
         company: exp.at("company", default: ""),
         duty: exp.at("duty", default: exp.at("position", default: "")),
         start: exp.at("start", default: ""),
         end: exp.at("end", default: ""),
+        url: url,
+        url-label: url-label,
       )[
-        #let details = exp.at("details", default: exp.at("description", default: ""))
-        #if type(details) == str {
-          eval(details, mode: "markup")
-        } else if type(details) == array {
-          for item in details {
+        #let details = exp.at("details", default: exp.at("description", default: ()))
+        #if type(details) == str { details = (details,) }
+        #if url != "" {
+          let label = get-url-label(url, custom-label: url-label)
+          details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+        }
+        #for item in details {
+          if type(item) == content {
+            [- #item]
+          } else {
             [- #eval(item, mode: "markup")]
           }
         }
@@ -264,17 +290,26 @@
     if items.len() > 0 {
       resume-section(section-title)
       for item in items {
+        let url = item.at("url", default: "")
+        let url-label = item.at("url-label", default: "")
         resume-project(
           title: item.at("title", default: item.at("name", default: "")),
           duty: item.at("duty", default: item.at("role", default: "")),
           start: item.at("start", default: ""),
           end: item.at("end", default: ""),
+          url: url,
+          url-label: url-label,
         )[
-          #let details = item.at("details", default: item.at("description", default: ""))
-          #if type(details) == str {
-            eval(details, mode: "markup")
-          } else if type(details) == array {
-            for detail in details {
+          #let details = item.at("details", default: item.at("description", default: ()))
+          #if type(details) == str { details = (details,) }
+          #if url != "" {
+            let label = get-url-label(url, custom-label: url-label)
+            details.insert(0, text(size: 9pt, fill: gray, [#label #link(url)]))
+          }
+          #for detail in details {
+            if type(detail) == content {
+              [- #detail]
+            } else {
               [- #eval(detail, mode: "markup")]
             }
           }
