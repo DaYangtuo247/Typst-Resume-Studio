@@ -4,15 +4,6 @@
 
 #import "../module-core.typ": markup, render-contacts, render-dict-item, resume-info-extras, standard-modules
 
-#let get-url-label(url, custom-label: "") = {
-  if custom-label != "" { return custom-label + ": " }
-  let label = "链接: "
-  if url.contains("github.com") { label = "GitHub: " }
-  else if url.contains("linkedin.com") { label = "LinkedIn: " }
-  else if url.contains("zhihu.com") { label = "知乎: " }
-  label
-}
-
 // ─────────────────────────────────────────────────────────
 //  辅助函数
 // ─────────────────────────────────────────────────────────
@@ -33,7 +24,7 @@
 //  简历块级元素
 // ─────────────────────────────────────────────────────────
 
-#let resume-item-header(date: "", title: "", subtitle: "", url: "", url-label: "") = {
+#let resume-item-header(date: "", title: "", subtitle: "") = {
   let title-content = markup(title)
   let left-text = if subtitle != "" {
     [#title-content - #markup(subtitle)]
@@ -48,27 +39,27 @@
   )
 }
 
-#let resume-education(university: "", degree: "", major: "", start: "", end: "", url: "", url-label: "", body) = {
+#let resume-education(university: "", degree: "", major: "", start: "", end: "", body) = {
   let date = resume-date(start, end: end)
   let subtitle = if major != "" { major + " - " + degree } else { degree }
 
-  resume-item-header(date: date, title: university, subtitle: subtitle, url: url, url-label: url-label)
+  resume-item-header(date: date, title: university, subtitle: subtitle)
   v(0.3em)
   body
 }
 
-#let resume-work(company: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
+#let resume-work(company: "", duty: "", start: "", end: "", body) = {
   let date = resume-date(start, end: end)
 
-  resume-item-header(date: date, title: company, subtitle: duty, url: url, url-label: url-label)
+  resume-item-header(date: date, title: company, subtitle: duty)
   v(0.3em)
   body
 }
 
-#let resume-project(title: "", duty: "", start: "", end: "", url: "", url-label: "", body) = {
+#let resume-project(title: "", duty: "", start: "", end: "", body) = {
   let date = resume-date(start, end: end)
 
-  resume-item-header(date: date, title: title, subtitle: duty, url: url, url-label: url-label)
+  resume-item-header(date: date, title: title, subtitle: duty)
   v(0.3em)
   body
 }
@@ -96,6 +87,7 @@
   let name = resume-info.at("name", default: "未命名")
   let avatar = resume-info.at("avatar", default: "")
   let contacts = resume-info.at("contacts", default: ())
+  let avatar-reserved-width = if avatar != "" { 2.8cm } else { 0cm }
 
   let fonts-theme = ("Noto Serif SC", "Times New Roman", "Heiti SC", "PingFang SC")
   let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
@@ -119,16 +111,18 @@
         #image(avatar, width: 2.2cm, height: 3cm, fit: "cover")
       ]
     ]
-    #align(center)[
-      #v(0.5em)
-      #text(weight: 700, size: 16pt, fill: black, name)
-      #v(0.8em)
+    #pad(left: avatar-reserved-width, right: avatar-reserved-width)[
+      #align(center)[
+        #v(0.5em)
+        #text(weight: 700, size: 16pt, fill: black, name)
+        #v(0.8em)
 
-      #if contacts.len() > 0 {
-        text(size: 9pt, fill: black)[#render-contacts(contacts, delimiter: [ #delimiter ], show-label: true)]
-      }
+        #if contacts.len() > 0 {
+          text(size: 9pt, fill: black)[#render-contacts(contacts, delimiter: [ #delimiter ], show-label: true)]
+        }
+      ]
     ]
-    #v(1.2em)
+    #v(0.5em)
   ]
 
   // ─────────────────────────────────────────────────────────
@@ -165,20 +159,13 @@
     } else if module.id == "education" {
       resume-section(module.title)
       for edu in module.payload {
-        let url = edu.at("url", default: "")
         resume-education(
           university: edu.school,
           degree: edu.degree,
           major: edu.major,
           start: edu.start,
           end: edu.end,
-          url: url,
-          url-label: edu.at("url-label", default: ""),
         )[
-          #if url != "" {
-            let label = get-url-label(url, custom-label: edu.at("url-label", default: ""))
-            block(width: 100%, below: 0.5em)[#text(size: 8.5pt, fill: rgb("#555555"), [#label #link(url)])]
-          }
           #let details = edu.at("details", default: ())
           #if details.len() > 0 {
             for d in details {
@@ -191,23 +178,15 @@
     } else if module.id == "experience" {
       resume-section(module.title)
       for exp in module.payload {
-        let url = exp.at("url", default: "")
         resume-work(
           company: exp.company,
           duty: exp.position,
           start: exp.start,
           end: exp.end,
-          url: url,
-          url-label: exp.at("url-label", default: ""),
         )[
           #let details = exp.at("details", default: ())
-          #let all-items = details.map(d => markup(d))
-          #if url != "" {
-            let label = get-url-label(url, custom-label: exp.at("url-label", default: ""))
-            all-items.insert(0, text(size: 8.5pt, fill: rgb("#555555"), [#label #link(url)]))
-          }
-          #if all-items.len() > 0 {
-            list(..all-items)
+          #if details.len() > 0 {
+            list(..details.map(d => markup(d)))
           }
         ]
         v(0.5em)
@@ -215,31 +194,38 @@
     } else if module.id == "projects" or module.id == "internship" {
       resume-section(module.title)
       for item in module.payload {
-        let url = item.at("url", default: "")
         resume-project(
           title: item.at("name", default: item.at("company", default: "")),
           duty: item.at("role", default: item.at("position", default: "")),
           start: item.start,
           end: item.end,
-          url: url,
-          url-label: item.at("url-label", default: ""),
         )[
           #let details = item.at("details", default: ())
-          #let all-items = details.map(d => markup(d))
-          #if url != "" {
-            let label = get-url-label(url, custom-label: item.at("url-label", default: ""))
-            all-items.insert(0, text(size: 8.5pt, fill: rgb("#555555"), [#label #link(url)]))
-          }
-          #if all-items.len() > 0 {
-            list(..all-items)
+          #if details.len() > 0 {
+            list(..details.map(d => markup(d)))
           }
         ]
         v(0.5em)
       }
     } else if module.id == "skills" {
       resume-section(module.title)
-      for skill in module.payload {
-        block(width: 100%, below: 0.5em)[#markup(skill)]
+      list(..module.payload.map(skill => [#markup(skill)]))
+      v(0.5em)
+    } else if module.id == "awards" {
+      resume-section(module.title)
+      if type(module.payload) == array {
+        list(..module.payload.map(item => {
+          if type(item) == str {
+            [#markup(item)]
+          } else if type(item) == dictionary {
+            let title = item.at("title", default: item.at("name", default: ""))
+            let desc = item.at("description", default: item.at("org", default: ""))
+            let date = item.at("date", default: "")
+            [#markup(str(title)) #if date != "" { [ (#markup(str(date)))] } #if desc != "" { [ — #markup(str(desc))] }]
+          } else {
+            [#str(item)]
+          }
+        }))
       }
       v(0.5em)
     } else {

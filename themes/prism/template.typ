@@ -1,4 +1,4 @@
-#import "../module-core.typ": get-url-label, markup, render-contact, render-dict-item, resume-info-extras, standard-modules
+#import "../module-core.typ": markup, render-contact, render-dict-item, resume-info-extras, standard-modules
 
 // ==========================================
 // 提取原 PDF 核心配色
@@ -207,15 +207,10 @@
       if module.id == "education" {
         for edu in module.payload {
           let school = edu.school
-          let edu-url = edu.at("url", default: "")
           let school-content = markup(school)
           exp-header(school-content, markup(edu.degree + " " + edu.major), markup(edu.start + " - " + edu.end))
           
           let details = edu.at("details", default: ())
-          if edu-url != "" {
-            let label = get-url-label(edu-url, custom-label: edu.at("url-label", default: ""))
-            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(edu-url)]))
-          }
           for d in details { 
             if type(d) == content { list(d) } else { list(markup(d)) }
           }
@@ -226,15 +221,10 @@
           // 兼容两种字段命名：company/name, position/role
           let company = exp.at("company", default: exp.at("name", default: ""))
           let position = exp.at("position", default: exp.at("role", default: ""))
-          let exp-url = exp.at("url", default: "")
           let company-content = markup(company)
           exp-header(company-content, markup(position), markup(exp.start + " - " + exp.end))
           
           let details = exp.at("details", default: ())
-          if exp-url != "" {
-            let label = get-url-label(exp-url, custom-label: exp.at("url-label", default: ""))
-            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(exp-url)]))
-          }
           for d in details {
             if type(d) == content {
               list(d)
@@ -250,14 +240,9 @@
       } else if module.id == "projects" {
         for proj in module.payload {
           let proj-name = markup(proj.name)
-          let project-url = proj.at("url", default: "")
           exp-header(proj-name, markup(proj.role), markup(proj.start + " - " + proj.end))
           
           let details = proj.at("details", default: ())
-          if project-url != "" {
-            let label = get-url-label(project-url, custom-label: proj.at("url-label", default: ""))
-            details.insert(0, text(size: 9pt, fill: color-gray, [#label #link(project-url)]))
-          }
           for d in details {
             if type(d) == content { list(d) } else { list(markup(d)) }
           }

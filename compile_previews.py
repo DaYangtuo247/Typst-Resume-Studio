@@ -10,7 +10,6 @@ FONT_WARNING_PATTERNS = [
     re.compile(r"字体.*(不存在|缺失|找不到)", re.IGNORECASE),
 ]
 
-LOCAL_FONTS_DIR = "fonts"
 _AVAILABLE_FONTS_CACHE = None
 
 ANSI_RED = "\033[31m"
@@ -45,14 +44,12 @@ def report_font_warnings(theme_name, warnings):
 
 
 def get_available_font_families():
-    """获取 Typst 可发现的字体族名称（包含本地 fonts/）"""
+    """获取 Typst 当前可发现的字体族名称（仅依赖系统字体环境）"""
     global _AVAILABLE_FONTS_CACHE
     if _AVAILABLE_FONTS_CACHE is not None:
         return _AVAILABLE_FONTS_CACHE
 
     cmd = ["typst", "fonts"]
-    if os.path.isdir(LOCAL_FONTS_DIR):
-        cmd.extend(["--font-path", LOCAL_FONTS_DIR])
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -117,7 +114,7 @@ def precheck_theme_fonts(theme, strict_fonts):
     print(red(f"  失败 [{theme['name']}]: 主题声明字体缺失（strict-fonts 预检查）"))
     for f in missing:
         print(red(f"    - 缺失字体: {f}"))
-    print(red("    - 提示: 将字体安装到系统，或放入 fonts/ 并确保字体族名称与主题中完全一致"))
+    print(red("    - 提示: 请将字体安装到系统，并确保字体族名称与主题中完全一致"))
     return False
 
 def list_themes():
@@ -164,9 +161,6 @@ def compile_preview(theme, format="pdf", strict_fonts=False):
         "--root", "."
     ]
 
-    if os.path.isdir(LOCAL_FONTS_DIR):
-        cmd.extend(["--font-path", LOCAL_FONTS_DIR])
-    
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
         font_warnings = extract_font_warnings(result.stderr)
@@ -219,9 +213,6 @@ def compile_resume_for_theme(theme, resume_content, output_dir, data_file, forma
         "--root", "."
     ]
 
-    if os.path.isdir(LOCAL_FONTS_DIR):
-        cmd.extend(["--font-path", LOCAL_FONTS_DIR])
-    
     if format == "png":
         cmd.extend(["--pages", "1"])
         

@@ -2,7 +2,7 @@
 //  导入模块化协议
 // ─────────────────────────────────────────────────────────
 
-#import "../module-core.typ": get-url-label, markup, render-contacts, render-dict-item, resume-info-extras, standard-modules
+#import "../module-core.typ": markup, render-contacts, render-dict-item, resume-info-extras, standard-modules
 
 // ─────────────────────────────────────────────────────────
 //  辅助函数
@@ -32,7 +32,7 @@
   v(0.4em)
 }
 
-#let resume-item-header(title: "", subtitle: "", date: "", url: "", url-label: "") = {
+#let resume-item-header(title: "", subtitle: "", date: "") = {
   let title-content = strong(markup(title))
   let left-part = if subtitle != "" {
     title-content + text(fill: black, weight: "regular")[#delimiter] + markup(subtitle)
@@ -105,18 +105,11 @@
       for edu in module.payload {
         let title = edu.school
         let subtitle = if edu.major != "" { edu.major + " " + edu.degree } else { edu.degree }
-        let url = edu.at("url", default: "")
         resume-item-header(
           title: title,
           subtitle: subtitle,
           date: resume-date(edu.start, end: edu.end),
-          url: url,
-          url-label: edu.at("url-label", default: ""),
         )
-        if url != "" {
-          let label = get-url-label(url, custom-label: edu.at("url-label", default: ""))
-          block(width: 100%, below: 0.5em)[#text(size: 9pt, fill: gray, [#label #link(url)])]
-        }
         let details = edu.at("details", default: ())
         if details.len() > 0 {
           block(width: 100%, below: 0.5em)[#markup(details.join("\n"))]
@@ -126,18 +119,11 @@
     } else if module.id == "experience" {
       resume-section(module.title)
       for exp in module.payload {
-        let url = exp.at("url", default: "")
         resume-item-header(
           title: exp.company,
           subtitle: exp.position,
           date: resume-date(exp.start, end: exp.end),
-          url: url,
-          url-label: exp.at("url-label", default: ""),
         )
-        if url != "" {
-          let label = get-url-label(url, custom-label: exp.at("url-label", default: ""))
-          block(width: 100%, below: 0.5em)[#text(size: 9pt, fill: gray, [#label #link(url)])]
-        }
         let details = exp.at("details", default: ())
         if details.len() > 0 {
           block(width: 100%, below: 0.5em)[#markup(details.join("\n"))]
@@ -147,18 +133,11 @@
     } else if module.id == "internship" {
       resume-section(module.title)
       for intern in module.payload {
-        let url = intern.at("url", default: "")
         resume-item-header(
           title: intern.at("company", default: intern.at("name", default: "")),
           subtitle: intern.at("position", default: intern.at("role", default: "")),
           date: resume-date(intern.start, end: intern.end),
-          url: url,
-          url-label: intern.at("url-label", default: ""),
         )
-        if url != "" {
-          let label = get-url-label(url, custom-label: intern.at("url-label", default: ""))
-          block(width: 100%, below: 0.5em)[#text(size: 9pt, fill: gray, [#label #link(url)])]
-        }
         let details = intern.at("details", default: ())
         if details.len() > 0 {
           block(width: 100%, below: 0.5em)[#markup(details.join("\n"))]
@@ -168,18 +147,11 @@
     } else if module.id == "projects" {
       resume-section(module.title)
       for proj in module.payload {
-        let url = proj.at("url", default: "")
         resume-item-header(
           title: proj.name,
           subtitle: proj.role,
           date: resume-date(proj.start, end: proj.end),
-          url: url,
-          url-label: proj.at("url-label", default: ""),
         )
-        if url != "" {
-          let label = get-url-label(url, custom-label: proj.at("url-label", default: ""))
-          block(width: 100%, below: 0.5em)[#text(size: 9pt, fill: gray, [#label #link(url)])]
-        }
         let details = proj.at("details", default: ())
         if details.len() > 0 {
           block(width: 100%, below: 0.5em)[#markup(details.join("\n"))]

@@ -7,7 +7,7 @@
 #let lightgray = rgb("#343a40")
 #let darkgray = rgb("#212529")
 
-#import "../module-core.typ": get-url-label, markup, render-contacts
+#import "../module-core.typ": markup, render-contacts
 
 #let _resume-info(data) = {
   data.at("information", default: (:))
@@ -249,23 +249,16 @@
   if education.len() > 0 {
     cv-section("教育经历")
     for edu in education {
-      let url = edu.at("url", default: "")
-      let url-label = edu.at("url-label", default: "")
       let details = edu.at("details", default: ())
       cv-entry(
         title: edu.at("degree", default: ""),
         society: edu.at("school", default: ""),
         date: edu.at("start", default: "") + " - " + edu.at("end", default: ""),
         description: {
-          if url != "" {
-            let label = get-url-label(url, custom-label: url-label)
-            details.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
-          }
           if details.len() > 0 {
             list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         },
-        url: url,
       )
     }
   }
@@ -276,23 +269,16 @@
   if experience.len() > 0 {
     cv-section("职业经历")
     for exp in experience {
-      let url = exp.at("url", default: "")
-      let url-label = exp.at("url-label", default: "")
       let details = exp.at("details", default: ())
       cv-entry(
         title: exp.at("position", default: exp.at("role", default: "")),
         society: exp.at("company", default: exp.at("name", default: "")),
         date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
         description: {
-          if url != "" {
-            let label = get-url-label(url, custom-label: url-label)
-            details.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
-          }
           if details.len() > 0 {
             list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         },
-        url: url,
       )
     }
   }
@@ -300,23 +286,16 @@
   if internship.len() > 0 {
     cv-section("实习经历")
     for exp in internship {
-      let url = exp.at("url", default: "")
-      let url-label = exp.at("url-label", default: "")
       let details = exp.at("details", default: ())
       cv-entry(
         title: exp.at("position", default: exp.at("role", default: "")),
         society: exp.at("company", default: exp.at("name", default: "")),
         date: exp.at("start", default: "") + " - " + exp.at("end", default: ""),
         description: {
-          if url != "" {
-            let label = get-url-label(url, custom-label: url-label)
-            details.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
-          }
           if details.len() > 0 {
             list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         },
-        url: url,
       )
     }
   }
@@ -327,23 +306,16 @@
   if projects.len() > 0 {
     cv-section("项目与协会")
     for proj in projects {
-      let url = proj.at("url", default: "")
-      let url-label = proj.at("url-label", default: "")
       let details = proj.at("details", default: ())
       cv-entry(
         title: proj.at("role", default: ""),
         society: proj.at("name", default: ""),
         date: proj.at("start", default: "") + " - " + proj.at("end", default: ""),
         description: {
-          if url != "" {
-            let label = get-url-label(url, custom-label: url-label)
-            details.insert(0, text(size: 8pt, fill: gray, [#label #link(url)]))
-          }
           if details.len() > 0 {
             list(..details.map(d => if type(d) == content { d } else { markup(d) }))
           }
         },
-        url: url,
       )
     }
   }
@@ -442,5 +414,4 @@
 
   body
 }
-
 

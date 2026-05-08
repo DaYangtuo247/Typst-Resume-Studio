@@ -18,8 +18,8 @@
 
 请注意：
 
-1. 字体族名称必须与 Typst 识别名称一致（可用 `typst fonts --font-path fonts` 查询）。
-2. 如果依赖仓库内 `fonts/` 目录字体，编译时必须传 `--font-path fonts`。
+1. 字体族名称必须与 Typst 识别名称一致（可用 `typst fonts` 查询）。
+2. 建议优先使用系统已安装字体，避免不同环境下字体发现行为不一致。
 3. 开发/发布前建议执行严格字体检查，避免“本机有字体、他人环境缺失”问题：
 
 ```bash
@@ -302,8 +302,8 @@ content:
             role: "职责"
             start: "2024.01"
             end: "2024.03"
-            url: "https://example.com/project"
             details:
+                - '项目地址：#link("https://example.com/project")[https://example.com/project]'
                 - "技术栈：Go / PostgreSQL / Redis"
                 - "..."
 
@@ -341,7 +341,7 @@ content:
 | `normalize-skills(skills)`                  | 将混合格式的技能数组归一化为字符串列表                                |
 | `resume-info-extras(resume-info)`           | 提取 resume-info 中的扩展字段（summary, interests 等）                |
 | `render-dict-item(item)`                    | 通用字典条目渲染                                                      |
-| `markup(text)`                              | 将 YAML 字符串解析为 Typst 标记                                       |
+| `markup(text)`                              | 将 YAML 字符串按内嵌 Typst 语法解析                                   |
 
 ---
 

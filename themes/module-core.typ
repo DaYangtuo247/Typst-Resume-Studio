@@ -1,17 +1,12 @@
 // Shared module contract for theme authors.
 // A theme can render sections by iterating over `standard-modules(data)`.
 
-// 获取 URL 的显示标签（例如 GitHub, LinkedIn 等）
-#let get-url-label(url, custom-label: "") = {
-  if custom-label != "" { return custom-label + ": " }
-  let label = "链接: "
-  if url.contains("github.com") { label = "GitHub: " }
-  else if url.contains("linkedin.com") { label = "LinkedIn: " }
-  else if url.contains("zhihu.com") { label = "知乎: " }
-  label
-}
-
-// 将 YAML 字符串作为 Typst 标记语言解析（支持 *加粗* _斜体_ 等内联语法）
+// 将 YAML 字符串作为 Typst 标记语言解析。
+// 推荐直接在字段中内嵌 Typst 语法，例如：
+// - #strong[粗体]
+// - #text(style: "oblique")[强调]
+// - #link("https://example.com")[链接]
+// - #raw("code")
 #let markup(text) = eval("[" + text + "]")
 
 // ─────────────────────────────────────────────────────────

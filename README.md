@@ -24,9 +24,6 @@
 # 编译主简历 (使用 resume.typ 中指定的主题)
 typst compile resume.typ
 
-# 若使用本地 fonts/ 目录中的字体，需显式指定字体路径
-typst compile resume.typ --font-path fonts
-
 # 预览特定主题 (以 modern 为例)
 typst compile themes/modern/example.typ --root .
 ```
@@ -66,11 +63,11 @@ global-font:
 注意事项：
 
 1. 字体族名称必须与 Typst 识别到的名称完全一致。
-2. 如果字体放在仓库 `fonts/` 目录，`typst compile` 时必须加 `--font-path fonts`。
+2. 建议直接使用系统已安装字体。
 3. 可用如下命令查看 Typst 实际识别到的字体族：
 
 ```bash
-typst fonts --font-path fonts
+typst fonts
 ```
 
 4. 批量预览推荐开启严格模式，缺失字体会明确报错：
@@ -159,6 +156,15 @@ content:
     - type: experience
       title: "工作经历"
       items: []
+```
+
+字段正文支持直接内嵌 Typst 语法，适合做高自由度排版控制，例如：
+
+```yaml
+details:
+    - '研究方向：#text(style: "oblique")[哈吉米科学]'
+    - '重点成果：#strong[统一异常处理] 与 #raw("AOP") 日志追踪'
+    - '项目地址：#link("https://github.com/example/repo")[GitHub]'
 ```
 
 说明：
