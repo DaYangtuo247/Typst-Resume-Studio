@@ -97,7 +97,18 @@
   set text(font: fonts-effective, lang: "zh", size: 9.5pt, fill: rgb("#3a3a3a"))
   set par(justify: true)
 
-  set list(indent: 0.5em, body-indent: 0.5em)
+  set list(
+    indent: 0.5em,
+    body-indent: 0.5em,
+    marker: box(
+      width: 0.65em,
+      baseline: 0.6em,
+    )[
+      #align(horizon + center)[
+        #circle(radius: 1.4pt, fill: rgb("#3a3a3a"))
+      ]
+    ],
+  )
   show list: set block(spacing: 0.5em)
   show strong: set text(fill: black)
 

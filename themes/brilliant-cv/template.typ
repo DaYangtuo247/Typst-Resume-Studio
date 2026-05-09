@@ -91,6 +91,13 @@
   box(width: 1fr, line(stroke: 0.9pt, length: 100%))
 }
 
+#let plain-section(title) = {
+  v(1pt)
+  text(size: 16pt, weight: "bold", fill: darkgray, title)
+  h(2pt)
+  box(width: 1fr, line(stroke: 0.9pt, length: 100%))
+}
+
 // ──────────────────────────────────────────────────
 // 条目样式（日期用蓝色斜体）
 // ──────────────────────────────────────────────────
@@ -157,23 +164,6 @@
     text(size: 9pt, weight: "bold", fill: accent-color, markup(date)),
     text(size: 9pt, weight: "medium", markup(title)),
     text(size: 9pt, fill: lightgray, style: "italic", markup(issuer)),
-  )
-}
-
-// ──────────────────────────────────────────────────
-// 技能条目
-// ──────────────────────────────────────────────────
-#let cv-skill(type: "", info: "") = {
-  let type-text = markup(str(type))
-  let info-text = markup(str(info))
-
-  v(1pt)
-  table(
-    columns: (16%, 1fr),
-    inset: 0pt,
-    stroke: 0pt,
-    gutter: 6pt,
-    text(size: 9pt, weight: "bold", fill: accent-color, type-text), text(size: 9pt, info-text),
   )
 }
 
@@ -347,32 +337,46 @@
   // 技能与兴趣
   // ══════════════════════════════════════════════════
   if skills.len() > 0 {
-    cv-section("技能与兴趣")
+    let skill-items = ()
     for skill in skills {
       if type(skill) == dictionary {
-        // 支持 name/level/description 格式
         let name = skill.at("name", default: "")
         if name != "" {
           let level = skill.at("level", default: "")
           let description = skill.at("description", default: "")
-          cv-skill(
-            type: name + (if level != "" { " (" + level + ")" } else { "" }),
-            info: description,
+          let heading = name + (if level != "" { " (" + level + ")" } else { "" })
+          skill-items.push(
+            if description != "" {
+              markup(heading + "：" + description)
+            } else {
+              markup(heading)
+            },
           )
         } else {
-          // 支持 category/items 格式
           let category = skill.at("category", default: "")
           let items = skill.at("items", default: ())
           if items.len() > 0 {
-            cv-skill(
-              type: category,
-              info: items.join(" | "),
+            let joined = items.map(item => str(item)).join("、")
+            skill-items.push(
+              if category != "" {
+                markup(category + "：" + joined)
+              } else {
+                markup(joined)
+              },
             )
           }
         }
-      } else if type(skill) == str {
-        cv-skill(type: "", info: skill)
+      } else if type(skill) == content {
+        skill-items.push(skill)
+      } else if str(skill) != "" {
+        skill-items.push(markup(str(skill)))
       }
+    }
+
+    if skill-items.len() > 0 {
+      plain-section("技能与兴趣")
+      set text(fill: darkgray)
+      list(..skill-items)
     }
   }
 
@@ -407,11 +411,21 @@
 
   let interests = resume-info.at("interests", default: ())
   if interests.len() > 0 {
-    cv-section("兴趣爱好")
-    text(size: 9pt, fill: lightgray, interests.join("、"))
-    v(4pt)
+    let interest-items = ()
+    for interest in interests {
+      if type(interest) == content {
+        interest-items.push(interest)
+      } else if str(interest) != "" {
+        interest-items.push(markup(str(interest)))
+      }
+    }
+    if interest-items.len() > 0 {
+      plain-section("兴趣爱好")
+      set text(fill: darkgray)
+      list(..interest-items)
+      v(4pt)
+    }
   }
 
   body
 }
-
