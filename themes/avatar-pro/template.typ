@@ -64,9 +64,9 @@
   body
 }
 
-#let resume-section(title) = {
+#let resume-section(title, font: ()) = {
   v(0.8em)
-  text(size: 11pt, weight: "bold", fill: black, title)
+  text(font: font, size: 11pt, weight: "medium", fill: black, title)
   v(-0.6em)
   line(length: 100%, stroke: 0.8pt + black)
   v(0.2em)
@@ -89,12 +89,22 @@
   let contacts = resume-info.at("contacts", default: ())
   let avatar-reserved-width = if avatar != "" { 2.8cm } else { 0cm }
 
-  let fonts-theme = ("Noto Serif SC", "Times New Roman", "Heiti SC", "PingFang SC")
-  let fonts-effective = if fonts-global.len() > 0 { (..fonts-global, ..fonts-theme) } else { fonts-theme }
+  let title-fonts-theme = ("Noto Sans CJK SC", "Noto Sans SC", "PingFang SC", "Heiti SC")
+  let body-fonts-theme = ("Noto Serif CJK SC", "Noto Serif SC", "Songti SC", "Times New Roman")
+  let title-fonts-effective = if fonts-global.len() > 0 {
+    (..title-fonts-theme, ..fonts-global)
+  } else {
+    title-fonts-theme
+  }
+  let body-fonts-effective = if fonts-global.len() > 0 {
+    (..body-fonts-theme, ..fonts-global)
+  } else {
+    body-fonts-theme
+  }
 
   set document(author: name, title: name + " 的简历")
   set page(margin: (x: 1.5cm, y: 1.5cm))
-  set text(font: fonts-effective, lang: "zh", size: 9.5pt, fill: rgb("#3a3a3a"))
+  set text(font: body-fonts-effective, lang: "zh", size: 9.5pt, fill: rgb("#3a3a3a"))
   set par(justify: true)
 
   set list(
@@ -125,11 +135,15 @@
     #pad(left: avatar-reserved-width, right: avatar-reserved-width)[
       #align(center)[
         #v(0.5em)
-        #text(weight: 700, size: 16pt, fill: black, name)
+        #text(font: title-fonts-effective, weight: 600, size: 16pt, fill: black, name)
         #v(0.8em)
 
         #if contacts.len() > 0 {
-          text(size: 9pt, fill: black)[#render-contacts(contacts, delimiter: [ #delimiter ], show-label: true)]
+          text(font: title-fonts-effective, size: 9pt, fill: black)[#render-contacts(
+            contacts,
+            delimiter: [ #delimiter ],
+            show-label: true,
+          )]
         }
       ]
     ]
@@ -143,19 +157,19 @@
   let extras = resume-info-extras(resume-info)
 
   if extras.summary != "" {
-    resume-section("个人简介")
+    resume-section("个人简介", font: title-fonts-effective)
     block(width: 100%, below: 0.5em)[#markup(extras.summary)]
     v(0.5em)
   }
 
   if extras.self-evaluation != "" {
-    resume-section("自我评价")
+    resume-section("自我评价", font: title-fonts-effective)
     block(width: 100%, below: 0.5em)[#markup(extras.self-evaluation)]
     v(0.5em)
   }
 
   if extras.interests.len() > 0 {
-    resume-section("兴趣爱好")
+    resume-section("兴趣爱好", font: title-fonts-effective)
     block(width: 100%, below: 0.5em)[#extras.interests.join("、")]
     v(0.5em)
   }
@@ -168,7 +182,7 @@
     if module.id == "resume-info" {
       continue
     } else if module.id == "education" {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       for edu in module.payload {
         resume-education(
           university: edu.school,
@@ -187,7 +201,7 @@
         v(0.5em)
       }
     } else if module.id == "experience" {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       for exp in module.payload {
         resume-work(
           company: exp.company,
@@ -203,7 +217,7 @@
         v(0.5em)
       }
     } else if module.id == "projects" or module.id == "internship" {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       for item in module.payload {
         resume-project(
           title: item.at("name", default: item.at("company", default: "")),
@@ -219,11 +233,11 @@
         v(0.5em)
       }
     } else if module.id == "skills" {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       list(..module.payload.map(skill => [#markup(skill)]))
       v(0.5em)
     } else if module.id == "awards" {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       if type(module.payload) == array {
         list(..module.payload.map(item => {
           if type(item) == str {
@@ -240,7 +254,7 @@
       }
       v(0.5em)
     } else {
-      resume-section(module.title)
+      resume-section(module.title, font: title-fonts-effective)
       if type(module.payload) == array {
         list(..module.payload.map(item => {
           if type(item) == str {
