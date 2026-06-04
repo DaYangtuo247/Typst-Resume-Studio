@@ -80,13 +80,15 @@ python compile_previews.py --pdf --strict-fonts
 
 本项目内置精美主题，可通过修改 `resume.typ` 中的 import 语句快速切换。
 
-|               Ats Friendly                |                Avatar Pro                 |               Brilliant Cv                |
-| :---------------------------------------: | :---------------------------------------: | :---------------------------------------: |
-| ![](themes/ats-friendly/ats-friendly.png) |   ![](themes/avatar-pro/avatar-pro.png)   | ![](themes/brilliant-cv/brilliant-cv.png) |
-|                  Classic                  |               Finance Blue                |                  Modern                   |
-|      ![](themes/classic/classic.png)      | ![](themes/finance-blue/finance-blue.png) |       ![](themes/modern/modern.png)       |
-|                   Prism                   |                 Resume Ng                 |                 Tech Pro                  |
-|        ![](themes/prism/prism.png)        |    ![](themes/resume-ng/resume-ng.png)    |     ![](themes/tech-pro/tech-pro.png)     |
+| Ats Friendly | Avatar Pro | Brilliant Cv |
+| :---: | :---: | :---: |
+| ![](themes/ats-friendly/ats-friendly.png) | ![](themes/avatar-pro/avatar-pro.png) | ![](themes/brilliant-cv/brilliant-cv.png) |
+| Classic | Finance Blue | Iiit Vadodara |
+| ![](themes/classic/classic.png) | ![](themes/finance-blue/finance-blue.png) | ![](themes/iiit-vadodara/iiit-vadodara.png) |
+| Modern | Prism | Resume Ng |
+| ![](themes/modern/modern.png) | ![](themes/prism/prism.png) | ![](themes/resume-ng/resume-ng.png) |
+| Tech Pro |  |  |
+| ![](themes/tech-pro/tech-pro.png) |  |  |
 
 ## 🎨 开发新主题
 
